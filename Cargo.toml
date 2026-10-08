@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
-members = ["kernel", "crates/capability"]
-default-members = ["crates/capability"]
+members = ["kernel", "crates/capability", "host/replay-lab"]
+default-members = ["crates/capability", "host/replay-lab"]
 
 [workspace.package]
 version = "0.1.0"

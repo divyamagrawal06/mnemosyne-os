@@ -21,7 +21,14 @@ The ignored `.tools` directory is a build cache. The runner verifies the bootloa
 | pic8259 | 0.11.0 | [rust-osdev/pic8259](https://github.com/rust-osdev/pic8259) | Apache-2.0 / MIT | Legacy PIC initialization and interrupt acknowledgment |
 | spin | 0.12.3 | [zesterer/spin](https://codeberg.org/zesterer/spin) | MIT | Allocation-free synchronization and lazy static initialization |
 | bitflags | 2.13.2 | [bitflags/bitflags](https://github.com/bitflags/bitflags) | MIT OR Apache-2.0 | Typed capability rights |
+| wasmi | 2.0.0 | [wasmi-labs/wasmi](https://github.com/wasmi-labs/wasmi) | MIT / Apache-2.0 | Wasm validation, interpretation, fuel metering, and resource limits in the host replay experiment |
+| wat | 1.228.0 | [bytecodealliance/wasm-tools](https://github.com/bytecodealliance/wasm-tools) | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | Compiling the original WAT test workload; matches Wasmi's parser generation |
+| sha2 | 0.10.9 | [RustCrypto/hashes](https://github.com/RustCrypto/hashes) | MIT OR Apache-2.0 | Module and checkpoint integrity digests |
+| serde | 1.0.228 | [serde-rs/serde](https://github.com/serde-rs/serde) | MIT OR Apache-2.0 | Structured experiment output |
+| serde_json | 1.0.151 | [serde-rs/json](https://github.com/serde-rs/json) | MIT OR Apache-2.0 | JSON report encoding |
 
 The source research cache is not incorporated into the implementation. Research references such as seL4, Theseus, RedLeaf, Golem, and AgentSpec are not vendored dependencies. Reuse decisions are made per component; a public repository is not automatically permission to redistribute its code under MIT.
+
+The Wasmi embedding uses upstream APIs without a fork or copied interpreter. Validation, portable dispatch, deterministic execution, fuel, and extra checks are enabled explicitly. The test workload and replay protocol are original code. Cargo dependencies include their upstream license files in the registry packages; retain those notices if distributing the packages or binaries.
 
 QEMU, xorriso, Git, the Rust toolchain, and the C compiler are external development tools. Their code is not compiled into the kernel. The first tested boot path uses QEMU's BIOS/SeaBIOS; the ISO also contains Limine's UEFI files, but that alone does not establish a tested UEFI boot.

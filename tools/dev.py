@@ -94,16 +94,43 @@ def smoke():
     print("Kernel smoke passed: memory, capability, exception, and timer checks.")
 
 
+def test():
+    cargo("test", "--locked")
+
+
+def check():
+    cargo("fmt", "--all", "--", "--check")
+    cargo("clippy", "--locked", "--all-targets", "--", "-D", "warnings")
+    cargo("clippy", "--locked", "-p", "mnemosyne-kernel", "--target", TARGET,
+          "--", "-D", "warnings")
+
+
+def demo():
+    result = run(["cargo", "run", "--locked", "--quiet", "-p", "mnemosyne-replay-lab"],
+                 capture_output=True, text=True)
+    report = json.loads(result.stdout)
+    if report.get("passed") is not True:
+        raise RuntimeError("replay demo failed its invariants")
+    BUILD.mkdir(parents=True, exist_ok=True)
+    report_path = BUILD / "replay-demo.json"
+    report_path.write_text(result.stdout, encoding="utf-8")
+    print(result.stdout, end="")
+    print(f"Replay report: {report_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["build", "image", "boot"])
+    parser.add_argument("command", choices=["build", "image", "boot", "test", "check", "demo"])
     args = parser.parse_args()
-    {"build": build, "image": image, "boot": smoke}[args.command]()
+    {"build": build, "image": image, "boot": smoke, "test": test,
+     "check": check, "demo": demo}[args.command]()
 
 
 if __name__ == "__main__":
     try:
         main()
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired, RuntimeError) as error:
+        if isinstance(error, subprocess.CalledProcessError) and error.stderr:
+            print(error.stderr, file=sys.stderr)
         print(f"error: {error}", file=sys.stderr)
         raise SystemExit(1)
