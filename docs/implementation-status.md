@@ -8,6 +8,7 @@ The first build uses native Windows Cargo and an existing Ubuntu WSL distributio
 | --- | --- | --- |
 | Boot and interrupts | x86-64 Limine boot, serial JSON events, GDT/TSS, double-fault stack, IDT, breakpoint handling, PIC/PIT timer interrupts | UEFI validation, APIC, SMP, scheduling and interrupt-driven preemption |
 | Physical memory | Bounded boot allocator over usable Limine regions; two allocated frames checked through the direct map | Reclamation, heap allocation, process address spaces and COW |
+| Page mapping | Reuses `x86_64::OffsetPageTable` to map, protect and unmap a new page; checks contents through the direct-map alias; actual CPU faults validate NX, read-only protection and access after unmapping | Separate address spaces, user/supervisor access tests, TLB shootdown across cores, mapping ownership and frame reclamation |
 | Capabilities | Allocation-free typed table, generation handles, rights attenuation, delegation subtree revocation, object invalidation; host tests and kernel smoke | Kernel object registry, cross-process transfer, caller-table lookup, syscall enforcement, concurrency and incremental revocation |
 | Wasm execution | Host Wasmi interpreter, integer fixture, fuel, fixed memory, restricted imports and validation profile | Port to an isolated userspace service, module admission for arbitrary applications, scheduling integration |
 | Replay | Host fixture checkpoint at handler boundaries, full memory/global capture, checkpoint-bound event log, input injection, output validation, poisoned-instance recovery | Durable log, IPC transport, COW checkpoints, consistent service-group snapshots and replay beyond the fixed fixture |
@@ -16,6 +17,8 @@ The first build uses native Windows Cargo and an existing Ubuntu WSL distributio
 | Evaluation | Bounded QEMU smoke test and host correctness tests; replay demo emits JSON | Statistical benchmark runner, fault campaign, dashboard and performance conclusions |
 
 The timer test establishes interrupt delivery. It does not establish that a scheduler can preempt a running process. Capability tests establish table behavior under its trusted-caller contract, not system-wide confinement. Wasmi's upstream validation is reused; neither the kernel nor the recovery design is formally verified.
+
+The paging test operates on the boot address space, on one CPU with interrupts disabled. Its allocated frames are retained for that boot. The page-fault handler resumes only explicitly armed assembly probes whose instruction pointer, fault address, and error flags match. Other page faults are fatal. Both debug and optimized builds must pass this test because it modifies a saved exception return address.
 
 ## Next acceptance gates
 
@@ -44,6 +47,7 @@ python tools/dev.py test
 python tools/dev.py check
 python tools/dev.py demo
 python tools/dev.py boot
+python tools/dev.py boot --release
 ```
 
 Host checks run without WSL. `demo` saves `build/replay-demo.json`; `boot` saves `build/boot.log` and `build/mnemosyne.iso`. Generated outputs are ignored by Git. Dependency versions and registry checksums are committed in `Cargo.lock`; copied code and bootloader pins are documented in `THIRD_PARTY.md`.

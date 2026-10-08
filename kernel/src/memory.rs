@@ -1,4 +1,8 @@
 use limine::memory_map::{Entry, EntryType};
+use x86_64::{
+    PhysAddr,
+    structures::paging::{FrameAllocator, PhysFrame, Size4KiB},
+};
 
 pub const PAGE_SIZE: u64 = 4096;
 
@@ -11,7 +15,10 @@ pub struct BootFrames<'a> {
 }
 
 impl<'a> BootFrames<'a> {
-    pub fn new(entries: &'a [&'a Entry]) -> Self {
+    /// # Safety
+    /// Usable entries must be disjoint, unused RAM. This must be the only allocator
+    /// for those entries; creating a second allocator would hand out aliased frames.
+    pub unsafe fn new(entries: &'a [&'a Entry]) -> Self {
         Self {
             entries,
             region: 0,
@@ -35,5 +42,15 @@ impl<'a> BootFrames<'a> {
             self.next = 0;
         }
         None
+    }
+}
+
+// SAFETY: construction requires unique ownership of disjoint usable regions;
+// allocation advances monotonically within each region and never reuses a frame.
+unsafe impl FrameAllocator<Size4KiB> for BootFrames<'_> {
+    fn allocate_frame(&mut self) -> Option<PhysFrame<Size4KiB>> {
+        self.allocate().map(|address| {
+            PhysFrame::from_start_address(PhysAddr::new(address)).expect("aligned boot frame")
+        })
     }
 }

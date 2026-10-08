@@ -108,7 +108,10 @@ extern "x86-interrupt" fn timer(_frame: InterruptStackFrame) {
     }
 }
 
-extern "x86-interrupt" fn page_fault(frame: InterruptStackFrame, error: PageFaultErrorCode) {
+extern "x86-interrupt" fn page_fault(mut frame: InterruptStackFrame, error: PageFaultErrorCode) {
+    if crate::paging::recover_probe(&mut frame, error) {
+        return;
+    }
     panic!("page fault: {error:?} {frame:?}");
 }
 

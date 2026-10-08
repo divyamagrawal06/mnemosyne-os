@@ -2,7 +2,7 @@
 
 A research Rust microkernel investigating capability isolation, deterministic service replay, and policy-checked recovery.
 
-The x86-64 kernel boots through Limine in QEMU and checks serial output, usable physical frames, capability attenuation/revocation, breakpoint handling, and PIT timer interrupts. The allocation-free capability library also has host tests for stale handles, subtree revocation, rights, capacity, object teardown, and generation exhaustion. This is a tested table implementation; a process/syscall security boundary is still pending.
+The x86-64 kernel boots through Limine in QEMU and checks serial output, usable physical frames, page mapping, capability attenuation/revocation, breakpoint handling, and PIT timer interrupts. Hardware fault probes verify NX execution protection, supervisor write protection, and access after unmapping. The allocation-free capability library also has host tests for stale handles, subtree revocation, rights, capacity, object teardown, and generation exhaustion. This is a tested table implementation; a process/syscall security boundary is still pending.
 
 The host replay lab embeds Wasmi and exercises a fixed integer KV workload. It records requests, clock/random inputs, effects, and replies; restores memory and a mutable global into a fresh instance; and checks replay against the log. It tests corrupted snapshots, altered traces, fuel exhaustion, memory limits, and traps. This experiment runs on the host, separately from the kernel.
 
@@ -24,12 +24,15 @@ From the repository root:
 ```sh
 python tools/dev.py build
 python tools/dev.py boot
+python tools/dev.py boot --release
 python tools/dev.py test
 python tools/dev.py check
 python tools/dev.py demo
 ```
 
 `boot` builds the kernel and an ISO, runs a headless 1-vCPU/256-MiB QEMU instance, verifies serial events and the exit status, and terminates the test VM. A timeout fails the test. Output is retained in `build/boot.log`; the image is `build/mnemosyne.iso`. Windows builds use native Cargo and WSL only for image construction and emulation. Set `MNEMOSYNE_WSL_DISTRO` to select another configured distribution.
+
+`boot --release` exercises the same checks with optimized code and retains `build/boot-release.log` and `build/mnemosyne-release.iso`. The prototype requires four-level x86-64 paging and NX support. Fault fixups recognize only the reserved smoke-test instructions, address, and expected fault flags; unexpected kernel faults remain fatal.
 
 The runner downloads a pinned Limine binary distribution into `.tools/limine` on first use. See [third-party attribution](THIRD_PARTY.md). BIOS boot is tested; UEFI files are included but UEFI boot is not yet tested.
 

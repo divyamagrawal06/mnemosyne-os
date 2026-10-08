@@ -6,6 +6,7 @@
 
 mod arch;
 mod memory;
+mod paging;
 mod serial;
 
 use limine::{
@@ -49,7 +50,8 @@ extern "C" fn kmain() -> ! {
         entries.len(),
         usable
     );
-    let mut frames = memory::BootFrames::new(entries);
+    // SAFETY: Limine provides disjoint unused RAM regions and this is their sole allocator.
+    let mut frames = unsafe { memory::BootFrames::new(entries) };
     let first = frames.allocate().expect("first usable frame");
     let second = frames.allocate().expect("second usable frame");
     assert_ne!(first, second);
@@ -67,6 +69,12 @@ extern "C" fn kmain() -> ! {
     serialln!("{{\"event\":\"frames_ok\",\"count\":2}}");
     capability_smoke();
     arch::initialize();
+    // SAFETY: the sole CPU is in Limine's address space, HHDM maps its page tables,
+    // and no other code accesses or mutates those tables while this test runs.
+    unsafe {
+        paging::smoke(offset, &mut frames);
+    }
+    serialln!("{{\"event\":\"paging_ok\",\"fault_probes\":3}}");
     arch::breakpoint_smoke();
     serialln!("{{\"event\":\"exception_ok\",\"vector\":3}}");
     let ticks = arch::timer_smoke();

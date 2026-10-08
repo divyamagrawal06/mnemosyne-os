@@ -37,8 +37,9 @@ def cargo(*args):
     run(["cargo", *args])
 
 
-def build():
-    cargo("build", "--locked", "-p", "mnemosyne-kernel", "--target", TARGET)
+def build(release=False):
+    cargo("build", "--locked", "-p", "mnemosyne-kernel", "--target", TARGET,
+          *(["--release"] if release else []))
 
 
 def bootloader():
@@ -52,21 +53,23 @@ def bootloader():
     run(linux_command(["make", "-C", linux_path(LIMINE), "-j2"]))
 
 
-def image():
-    build()
+def image(release=False):
+    build(release)
     bootloader()
-    stage = BUILD / "iso-root"
+    suffix = "-release" if release else ""
+    profile = "release" if release else "debug"
+    stage = BUILD / ("iso-root" + suffix)
     boot = stage / "boot"
     loader = boot / "limine"
     efi = stage / "EFI" / "BOOT"
     for folder in (loader, efi):
         folder.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(ROOT / "target" / TARGET / "debug" / "mnemosyne-kernel", boot / "mnemosyne-kernel")
+    shutil.copyfile(ROOT / "target" / TARGET / profile / "mnemosyne-kernel", boot / "mnemosyne-kernel")
     shutil.copyfile(ROOT / "boot" / "limine.conf", boot / "limine.conf")
     for name in ("limine-bios.sys", "limine-bios-cd.bin", "limine-uefi-cd.bin", "LICENSE"):
         shutil.copyfile(LIMINE / name, loader / name)
     shutil.copyfile(LIMINE / "BOOTX64.EFI", efi / "BOOTX64.EFI")
-    iso = BUILD / "mnemosyne.iso"
+    iso = BUILD / ("mnemosyne" + suffix + ".iso")
     run(linux_command(["xorriso", "-as", "mkisofs", "-b", "boot/limine/limine-bios-cd.bin",
          "-no-emul-boot", "-boot-load-size", "4", "-boot-info-table", "--efi-boot",
          "boot/limine/limine-uefi-cd.bin", "-efi-boot-part", "--efi-boot-image",
@@ -75,8 +78,8 @@ def image():
     return iso
 
 
-def smoke():
-    iso = image()
+def smoke(release=False):
+    iso = image(release)
     command = linux_command(["timeout", "--signal=KILL", "25s", "qemu-system-x86_64",
         "-machine", "q35", "-accel", "tcg,thread=single", "-cpu", "qemu64",
         "-m", "256M", "-smp", "1", "-cdrom", linux_path(iso), "-display", "none",
@@ -85,13 +88,15 @@ def smoke():
     print("+ " + " ".join(command), flush=True)
     result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=35)
     output = result.stdout + result.stderr
-    (BUILD / "boot.log").write_text(output, encoding="utf-8")
+    log_path = BUILD / ("boot-release.log" if release else "boot.log")
+    log_path.write_text(output, encoding="utf-8")
     print(output, end="")
     events = [json.loads(line) for line in result.stdout.splitlines() if line.startswith('{"event":')]
-    required = {"boot", "memory", "frames_ok", "capabilities_ok", "exception_ok", "timer_ok", "boot_ok"}
+    required = {"boot", "memory", "frames_ok", "capabilities_ok", "paging_ok",
+                "exception_ok", "timer_ok", "boot_ok"}
     if result.returncode != 33 or not required <= {e["event"] for e in events}:
-        raise RuntimeError(f"kernel smoke failed (QEMU status {result.returncode}); see build/boot.log")
-    print("Kernel smoke passed: memory, capability, exception, and timer checks.")
+        raise RuntimeError(f"kernel smoke failed (QEMU status {result.returncode}); see {log_path}")
+    print("Kernel smoke passed: frames, page permissions, capabilities, exceptions, and timer.")
 
 
 def test():
@@ -121,9 +126,15 @@ def demo():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=["build", "image", "boot", "test", "check", "demo"])
+    parser.add_argument("--release", action="store_true", help="optimized kernel build/image/boot")
     args = parser.parse_args()
-    {"build": build, "image": image, "boot": smoke, "test": test,
-     "check": check, "demo": demo}[args.command]()
+    kernel_commands = {"build": build, "image": image, "boot": smoke}
+    if args.command in kernel_commands:
+        kernel_commands[args.command](release=args.release)
+    else:
+        if args.release:
+            parser.error("--release applies only to build, image, or boot")
+        {"test": test, "check": check, "demo": demo}[args.command]()
 
 
 if __name__ == "__main__":
