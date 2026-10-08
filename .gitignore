@@ -1,0 +1,10 @@
+/target/
+/build/
+/.tools/
+/research/cache/
+**/__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+

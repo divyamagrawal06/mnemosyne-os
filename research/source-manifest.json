@@ -1,0 +1,698 @@
+[
+  {
+    "repo": "seL4/seL4",
+    "sha": "6df0b6ee61f6a9e8a4ee7de8eb8fd698c0211b64",
+    "path": "src/fastpath/fastpath.c",
+    "url": "https://github.com/seL4/seL4/blob/6df0b6ee61f6a9e8a4ee7de8eb8fd698c0211b64/src/fastpath/fastpath.c",
+    "sha256": "bb75178885c4b66f94f83d0d4d8c68838aff2cc7ec34823566a66fcbc7bbfa82",
+    "bytes": 32338
+  },
+  {
+    "repo": "seL4/seL4",
+    "sha": "6df0b6ee61f6a9e8a4ee7de8eb8fd698c0211b64",
+    "path": "src/object/cnode.c",
+    "url": "https://github.com/seL4/seL4/blob/6df0b6ee61f6a9e8a4ee7de8eb8fd698c0211b64/src/object/cnode.c",
+    "sha256": "84dc852dc76ef14eb99b2129eb9269a66c4ecac30c7e81fe1a5fd9540a16956f",
+    "bytes": 27944
+  },
+  {
+    "repo": "seL4/seL4",
+    "sha": "6df0b6ee61f6a9e8a4ee7de8eb8fd698c0211b64",
+    "path": "src/kernel/thread.c",
+    "url": "https://github.com/seL4/seL4/blob/6df0b6ee61f6a9e8a4ee7de8eb8fd698c0211b64/src/kernel/thread.c",
+    "sha256": "28175b3c9ca4ae6bc59649528fce429228ad3966bc38b42efa09f47d21c36bd9",
+    "bytes": 23899
+  },
+  {
+    "repo": "seL4/seL4",
+    "sha": "6df0b6ee61f6a9e8a4ee7de8eb8fd698c0211b64",
+    "path": "src/object/endpoint.c",
+    "url": "https://github.com/seL4/seL4/blob/6df0b6ee61f6a9e8a4ee7de8eb8fd698c0211b64/src/object/endpoint.c",
+    "sha256": "ee8af84d7aa1c33755573468d9063aead7a4cbd797e61e8b849b1352e7ff8648",
+    "bytes": 18827
+  },
+  {
+    "repo": "seL4/seL4",
+    "sha": "6df0b6ee61f6a9e8a4ee7de8eb8fd698c0211b64",
+    "path": "LICENSES/GPL-2.0-only.txt",
+    "url": "https://github.com/seL4/seL4/blob/6df0b6ee61f6a9e8a4ee7de8eb8fd698c0211b64/LICENSES/GPL-2.0-only.txt",
+    "sha256": "d1cf0896da7045d841fe45b0991cf35540bac1a17b5d11f4afcf8fcb950246b5",
+    "bytes": 17623
+  },
+  {
+    "repo": "seL4/microkit",
+    "sha": "39e7561ef07c353e8f333d77ed70f6c712174a05",
+    "path": "libmicrokit/src/main.c",
+    "url": "https://github.com/seL4/microkit/blob/39e7561ef07c353e8f333d77ed70f6c712174a05/libmicrokit/src/main.c",
+    "sha256": "a1a76c85a79a09e011fd800dc47fb67ae952c739805194624697189cda6e0808",
+    "bytes": 7268
+  },
+  {
+    "repo": "seL4/microkit",
+    "sha": "39e7561ef07c353e8f333d77ed70f6c712174a05",
+    "path": "monitor/src/main.c",
+    "url": "https://github.com/seL4/microkit/blob/39e7561ef07c353e8f333d77ed70f6c712174a05/monitor/src/main.c",
+    "sha256": "a7bf3079615aba0956a6887dd5b89ac6b1aab94d745d4eb5f27ae0acf882c92d",
+    "bytes": 25620
+  },
+  {
+    "repo": "seL4/microkit",
+    "sha": "39e7561ef07c353e8f333d77ed70f6c712174a05",
+    "path": "docs/manual.md",
+    "url": "https://github.com/seL4/microkit/blob/39e7561ef07c353e8f333d77ed70f6c712174a05/docs/manual.md",
+    "sha256": "813b35b1a012634c5f160071ec2f6fcf4a3fc3e9c5fc1e60b3d69786e631bf31",
+    "bytes": 98439
+  },
+  {
+    "repo": "seL4/microkit",
+    "sha": "39e7561ef07c353e8f333d77ed70f6c712174a05",
+    "path": "tool/microkit/src/sdf.rs",
+    "url": "https://github.com/seL4/microkit/blob/39e7561ef07c353e8f333d77ed70f6c712174a05/tool/microkit/src/sdf.rs",
+    "sha256": "464df8972a09c5e14b217e77b5fda80a0be02819c9d2b5061676020f26bea935",
+    "bytes": 25739
+  },
+  {
+    "repo": "seL4/microkit",
+    "sha": "39e7561ef07c353e8f333d77ed70f6c712174a05",
+    "path": "tool/microkit/src/sdf/domains.rs",
+    "url": "https://github.com/seL4/microkit/blob/39e7561ef07c353e8f333d77ed70f6c712174a05/tool/microkit/src/sdf/domains.rs",
+    "sha256": "cfe691159843ace07d1e45e8d972ca2929e464d46e136446b02f28f8ccf64e93",
+    "bytes": 11199
+  },
+  {
+    "repo": "seL4/microkit",
+    "sha": "39e7561ef07c353e8f333d77ed70f6c712174a05",
+    "path": "LICENSES/BSD-2-Clause.txt",
+    "url": "https://github.com/seL4/microkit/blob/39e7561ef07c353e8f333d77ed70f6c712174a05/LICENSES/BSD-2-Clause.txt",
+    "sha256": "017b5ee48f680e82cba79141c7895a1f02b856df2512225f5c427fe36765ef0b",
+    "bytes": 1266
+  },
+  {
+    "repo": "theseus-os/Theseus",
+    "sha": "1fbfe567075a65ed749b6680db1aeb538819c70c",
+    "path": "README.md",
+    "url": "https://github.com/theseus-os/Theseus/blob/1fbfe567075a65ed749b6680db1aeb538819c70c/README.md",
+    "sha256": "f7f7f1c03422c084c71930291f8b950af5393728e0ff2ea48eda08375d5f6582",
+    "bytes": 15469
+  },
+  {
+    "repo": "theseus-os/Theseus",
+    "sha": "1fbfe567075a65ed749b6680db1aeb538819c70c",
+    "path": "LICENSE-MIT",
+    "url": "https://github.com/theseus-os/Theseus/blob/1fbfe567075a65ed749b6680db1aeb538819c70c/LICENSE-MIT",
+    "sha256": "3392b406cb00f36fe15123500201825963c93ef8a65c37bf7ec4f3898571f657",
+    "bytes": 1077
+  },
+  {
+    "repo": "theseus-os/Theseus",
+    "sha": "1fbfe567075a65ed749b6680db1aeb538819c70c",
+    "path": "kernel/state_store/src/lib.rs",
+    "url": "https://github.com/theseus-os/Theseus/blob/1fbfe567075a65ed749b6680db1aeb538819c70c/kernel/state_store/src/lib.rs",
+    "sha256": "e35afdd0a0fe14c1e06e15c288284b3931aa6e17ece45b2aacbf84e4453621ae",
+    "bytes": 7474
+  },
+  {
+    "repo": "theseus-os/Theseus",
+    "sha": "1fbfe567075a65ed749b6680db1aeb538819c70c",
+    "path": "kernel/fault_crate_swap/src/lib.rs",
+    "url": "https://github.com/theseus-os/Theseus/blob/1fbfe567075a65ed749b6680db1aeb538819c70c/kernel/fault_crate_swap/src/lib.rs",
+    "sha256": "d880258747e45ac1e3532db468fbd78cc457da1a5cffad911f794e87b345e57b",
+    "bytes": 19463
+  },
+  {
+    "repo": "theseus-os/Theseus",
+    "sha": "1fbfe567075a65ed749b6680db1aeb538819c70c",
+    "path": "kernel/catch_unwind/src/lib.rs",
+    "url": "https://github.com/theseus-os/Theseus/blob/1fbfe567075a65ed749b6680db1aeb538819c70c/kernel/catch_unwind/src/lib.rs",
+    "sha256": "927aa2385b167375d47d39efcc218fb54bf0701d919f46aaf2f9da1e8899fe12",
+    "bytes": 5412
+  },
+  {
+    "repo": "wasmi-labs/wasmi",
+    "sha": "2970aa871cc1001b57b267ccecdcd1e42306199e",
+    "path": "crates/wasmi/src/engine/resumable.rs",
+    "url": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/crates/wasmi/src/engine/resumable.rs",
+    "sha256": "6a37cd13f237ec09acd3ad90df3f88870ad74904a0b53f2df27913a35c382858",
+    "bytes": 20198
+  },
+  {
+    "repo": "wasmi-labs/wasmi",
+    "sha": "2970aa871cc1001b57b267ccecdcd1e42306199e",
+    "path": "crates/wasmi/src/engine/config.rs",
+    "url": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/crates/wasmi/src/engine/config.rs",
+    "sha256": "67eefb56b0e89c2270b6f271e82b6510afed39a1728189a3586684e9295709c6",
+    "bytes": 16967
+  },
+  {
+    "repo": "theseus-os/Theseus",
+    "sha": "1fbfe567075a65ed749b6680db1aeb538819c70c",
+    "path": "applications/test_restartable/src/lib.rs",
+    "url": "https://github.com/theseus-os/Theseus/blob/1fbfe567075a65ed749b6680db1aeb538819c70c/applications/test_restartable/src/lib.rs",
+    "sha256": "8ce6ab91c4d5cb8e641854943e70648c1da83f6d9288e28d474a3cfc12c8f96d",
+    "bytes": 7333
+  },
+  {
+    "repo": "wasmi-labs/wasmi",
+    "sha": "2970aa871cc1001b57b267ccecdcd1e42306199e",
+    "path": "crates/wasmi/Cargo.toml",
+    "url": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/crates/wasmi/Cargo.toml",
+    "sha256": "d8de9f55b9b9ce9e2f772998c5d36e80d6b027ec8620daa8f1e6ba84e61ed4e6",
+    "bytes": 3064
+  },
+  {
+    "repo": "wasmi-labs/wasmi",
+    "sha": "2970aa871cc1001b57b267ccecdcd1e42306199e",
+    "path": "crates/wasmi/src/store/mod.rs",
+    "url": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/crates/wasmi/src/store/mod.rs",
+    "sha256": "d168124aba82ca348ad0b3081d0947159b1fd716fe807392207dd5ccb1b57bde",
+    "bytes": 13572
+  },
+  {
+    "repo": "wasmi-labs/wasmi",
+    "sha": "2970aa871cc1001b57b267ccecdcd1e42306199e",
+    "path": "crates/wasmi/src/limiter.rs",
+    "url": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/crates/wasmi/src/limiter.rs",
+    "sha256": "8c618d9cbcba96190aa83ba4faf899bfec215f9df3943e10c08d4bde50562771",
+    "bytes": 6297
+  },
+  {
+    "repo": "wasmi-labs/wasmi",
+    "sha": "2970aa871cc1001b57b267ccecdcd1e42306199e",
+    "path": "crates/core/src/fuel.rs",
+    "url": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/crates/core/src/fuel.rs",
+    "sha256": "e28382017fb29ac766823f6d39215d8fa1ff8fc69ecc5228d12ae647de7a5b24",
+    "bytes": 10309
+  },
+  {
+    "repo": "wasmi-labs/wasmi",
+    "sha": "2970aa871cc1001b57b267ccecdcd1e42306199e",
+    "path": "crates/wasmi/tests/integration/resumable_call.rs",
+    "url": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/crates/wasmi/tests/integration/resumable_call.rs",
+    "sha256": "b9c32df043347d530eb0eee574670048b71b0302f703a817700f0b73947428ea",
+    "bytes": 13007
+  },
+  {
+    "repo": "wasmi-labs/wasmi",
+    "sha": "2970aa871cc1001b57b267ccecdcd1e42306199e",
+    "path": "LICENSE-MIT",
+    "url": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/LICENSE-MIT",
+    "sha256": "172bc1497507c1c363496bc23b0f16de8fa8e94befa85db6c8d9fa790e0a8657",
+    "bytes": 1062
+  },
+  {
+    "repo": "rr-debugger/rr",
+    "sha": "858a9fbcc5ac71cc578c2e1966f573d7c4ff8257",
+    "path": "src/PerfCounters.cc",
+    "url": "https://github.com/rr-debugger/rr/blob/858a9fbcc5ac71cc578c2e1966f573d7c4ff8257/src/PerfCounters.cc",
+    "sha256": "db54ad86fb46b5699a825bfd2468f4fcf4c4929eeaaafe7d2471cde09ac87cae",
+    "bytes": 49253
+  },
+  {
+    "repo": "rr-debugger/rr",
+    "sha": "858a9fbcc5ac71cc578c2e1966f573d7c4ff8257",
+    "path": "src/ReplaySession.cc",
+    "url": "https://github.com/rr-debugger/rr/blob/858a9fbcc5ac71cc578c2e1966f573d7c4ff8257/src/ReplaySession.cc",
+    "sha256": "eeda6d089478c27cc6dc241015dc1dfac61b72545b7288ab2b7fd8cddd7d0a1a",
+    "bytes": 88043
+  },
+  {
+    "repo": "rr-debugger/rr",
+    "sha": "858a9fbcc5ac71cc578c2e1966f573d7c4ff8257",
+    "path": "src/RecordSession.cc",
+    "url": "https://github.com/rr-debugger/rr/blob/858a9fbcc5ac71cc578c2e1966f573d7c4ff8257/src/RecordSession.cc",
+    "sha256": "a3784a9388f4c5ed1d854870a288cc63251bb58f7c0caf959650fa4866c66e87",
+    "bytes": 111627
+  },
+  {
+    "repo": "rr-debugger/rr",
+    "sha": "858a9fbcc5ac71cc578c2e1966f573d7c4ff8257",
+    "path": "src/TraceStream.h",
+    "url": "https://github.com/rr-debugger/rr/blob/858a9fbcc5ac71cc578c2e1966f573d7c4ff8257/src/TraceStream.h",
+    "sha256": "54a6d5318a3bfeaece408064cfeecad86e725c32a0558d2d0cd11de72a491c7e",
+    "bytes": 19039
+  },
+  {
+    "repo": "rr-debugger/rr",
+    "sha": "858a9fbcc5ac71cc578c2e1966f573d7c4ff8257",
+    "path": "LICENSE",
+    "url": "https://github.com/rr-debugger/rr/blob/858a9fbcc5ac71cc578c2e1966f573d7c4ff8257/LICENSE",
+    "sha256": "aaec860979579376519b0bb376a317d0c52a7182f5dde5f362a8df3590312f9f",
+    "bytes": 22309
+  },
+  {
+    "repo": "cberner/redb",
+    "sha": "f403a514fd557f633bd4725248f0d19b434eedff",
+    "path": "README.md",
+    "url": "https://github.com/cberner/redb/blob/f403a514fd557f633bd4725248f0d19b434eedff/README.md",
+    "sha256": "23400cd94b120495a39f39fc90cd2d336079725c3b917b7e51d9c502b991d85d",
+    "bytes": 4849
+  },
+  {
+    "repo": "cberner/redb",
+    "sha": "f403a514fd557f633bd4725248f0d19b434eedff",
+    "path": "Cargo.toml",
+    "url": "https://github.com/cberner/redb/blob/f403a514fd557f633bd4725248f0d19b434eedff/Cargo.toml",
+    "sha256": "eda1bfc2fff1f540cd8e8a3d25704366a11e945730e4218058d7b6ff599a20d7",
+    "bytes": 2982
+  },
+  {
+    "repo": "cberner/redb",
+    "sha": "f403a514fd557f633bd4725248f0d19b434eedff",
+    "path": "docs/design.md",
+    "url": "https://github.com/cberner/redb/blob/f403a514fd557f633bd4725248f0d19b434eedff/docs/design.md",
+    "sha256": "fdd4454b665a605c2470ee43b51b0b2149ca1bfe59896c472f25acde15a6528a",
+    "bytes": 39892
+  },
+  {
+    "repo": "cberner/redb",
+    "sha": "f403a514fd557f633bd4725248f0d19b434eedff",
+    "path": "src/tree_store/page_store/savepoint.rs",
+    "url": "https://github.com/cberner/redb/blob/f403a514fd557f633bd4725248f0d19b434eedff/src/tree_store/page_store/savepoint.rs",
+    "sha256": "ef3367969c1eaa0bc4b041c0120c2903d9538eab6c568f7cb3edd5d3de1a671d",
+    "bytes": 8635
+  },
+  {
+    "repo": "cberner/redb",
+    "sha": "f403a514fd557f633bd4725248f0d19b434eedff",
+    "path": "src/tree_store/page_store/header.rs",
+    "url": "https://github.com/cberner/redb/blob/f403a514fd557f633bd4725248f0d19b434eedff/src/tree_store/page_store/header.rs",
+    "sha256": "10731897a270c20b812bd5499e185aa2817065029ab9ff4d722e0435e4b3b625",
+    "bytes": 68749
+  },
+  {
+    "repo": "cberner/redb",
+    "sha": "f403a514fd557f633bd4725248f0d19b434eedff",
+    "path": "src/transactions.rs",
+    "url": "https://github.com/cberner/redb/blob/f403a514fd557f633bd4725248f0d19b434eedff/src/transactions.rs",
+    "sha256": "4dee5b2915fba8f016e90f08e9937016a4aa62365b939421e4ba4c948cd98db4",
+    "bytes": 130291
+  },
+  {
+    "repo": "cberner/redb",
+    "sha": "f403a514fd557f633bd4725248f0d19b434eedff",
+    "path": "tests/crash_consistency.rs",
+    "url": "https://github.com/cberner/redb/blob/f403a514fd557f633bd4725248f0d19b434eedff/tests/crash_consistency.rs",
+    "sha256": "2187e55d97d8a013800af57510a478f90e25ae2e0d58f2f5769e258b87ad02b5",
+    "bytes": 6106
+  },
+  {
+    "repo": "cberner/redb",
+    "sha": "f403a514fd557f633bd4725248f0d19b434eedff",
+    "path": "crates/redb-no-std-test/Cargo.toml",
+    "url": "https://github.com/cberner/redb/blob/f403a514fd557f633bd4725248f0d19b434eedff/crates/redb-no-std-test/Cargo.toml",
+    "sha256": "133bea3d33f64b63767d72ab201df168ba0a0a2734989c3d69ed884204804312",
+    "bytes": 322
+  },
+  {
+    "repo": "cberner/redb",
+    "sha": "f403a514fd557f633bd4725248f0d19b434eedff",
+    "path": "LICENSE-MIT",
+    "url": "https://github.com/cberner/redb/blob/f403a514fd557f633bd4725248f0d19b434eedff/LICENSE-MIT",
+    "sha256": "9dc47584f810f4a0f88197b590bf428b154dc5a7f87237c06a39720241e0461f",
+    "bytes": 1061
+  },
+  {
+    "repo": "littlefs-project/littlefs",
+    "sha": "6cb4e86540eca0d9ba62500a298385c9d863c8be",
+    "path": "DESIGN.md",
+    "url": "https://github.com/littlefs-project/littlefs/blob/6cb4e86540eca0d9ba62500a298385c9d863c8be/DESIGN.md",
+    "sha256": "2a8b3459d74b9fa8bdd947738522c46331739405b1fc3d70f057f636a1dea768",
+    "bytes": 96235
+  },
+  {
+    "repo": "littlefs-project/littlefs",
+    "sha": "6cb4e86540eca0d9ba62500a298385c9d863c8be",
+    "path": "SPEC.md",
+    "url": "https://github.com/littlefs-project/littlefs/blob/6cb4e86540eca0d9ba62500a298385c9d863c8be/SPEC.md",
+    "sha256": "6dd74dfc58ac93589f8e002bb73c0830a59206912cfe8c951c07eb2bd5fccad0",
+    "bytes": 33698
+  },
+  {
+    "repo": "littlefs-project/littlefs",
+    "sha": "6cb4e86540eca0d9ba62500a298385c9d863c8be",
+    "path": "tests/test_powerloss.toml",
+    "url": "https://github.com/littlefs-project/littlefs/blob/6cb4e86540eca0d9ba62500a298385c9d863c8be/tests/test_powerloss.toml",
+    "sha256": "8a533ed184c2dbfef7c79ad1caa386fea97a3ac367710d6b637bda11f40e5eb0",
+    "bytes": 5842
+  },
+  {
+    "repo": "littlefs-project/littlefs",
+    "sha": "6cb4e86540eca0d9ba62500a298385c9d863c8be",
+    "path": "bd/lfs_emubd.c",
+    "url": "https://github.com/littlefs-project/littlefs/blob/6cb4e86540eca0d9ba62500a298385c9d863c8be/bd/lfs_emubd.c",
+    "sha256": "cb4c45c8a5cb99da4ad209f1cdee712d05e737435cb5a8392cd0969424184ba8",
+    "bytes": 22788
+  },
+  {
+    "repo": "littlefs-project/littlefs",
+    "sha": "6cb4e86540eca0d9ba62500a298385c9d863c8be",
+    "path": "tests/test_exhaustion.toml",
+    "url": "https://github.com/littlefs-project/littlefs/blob/6cb4e86540eca0d9ba62500a298385c9d863c8be/tests/test_exhaustion.toml",
+    "sha256": "b6012493e985c0ba2a203c80b8d404b6ae801730fe57b31bc26b09df415e8ed4",
+    "bytes": 16965
+  },
+  {
+    "repo": "littlefs-project/littlefs",
+    "sha": "6cb4e86540eca0d9ba62500a298385c9d863c8be",
+    "path": "LICENSE.md",
+    "url": "https://github.com/littlefs-project/littlefs/blob/6cb4e86540eca0d9ba62500a298385c9d863c8be/LICENSE.md",
+    "sha256": "0cb4ff1daf5fdc1359c6a6ee3116092f08fc100c9d58b1b77ab17bfd801f856d",
+    "bytes": 1523
+  },
+  {
+    "repo": "mit-pdos/fscq",
+    "sha": "2c7ef9c268fd79a81b26b44ef720f8e6a1e938a0",
+    "path": "LICENSE",
+    "url": "https://github.com/mit-pdos/fscq/blob/2c7ef9c268fd79a81b26b44ef720f8e6a1e938a0/LICENSE",
+    "sha256": "c3e82cd31ff9cafe29428460c07c6940dc70aa15126870af31a2db63b39ecf59",
+    "bytes": 1112
+  },
+  {
+    "repo": "mit-pdos/fscq",
+    "sha": "2c7ef9c268fd79a81b26b44ef720f8e6a1e938a0",
+    "path": "README.md",
+    "url": "https://github.com/mit-pdos/fscq/blob/2c7ef9c268fd79a81b26b44ef720f8e6a1e938a0/README.md",
+    "sha256": "507a255281cc2040d0752d6f3ca33f2f9b173ccf448bec13ec489d6b5e26b9bb",
+    "bytes": 1032
+  },
+  {
+    "repo": "mit-pdos/fscq",
+    "sha": "2c7ef9c268fd79a81b26b44ef720f8e6a1e938a0",
+    "path": "src/Hoare.v",
+    "url": "https://github.com/mit-pdos/fscq/blob/2c7ef9c268fd79a81b26b44ef720f8e6a1e938a0/src/Hoare.v",
+    "sha256": "043334e4a8e1151c00204f67c262e0b8cffaca32cc751eeb11ce34ab26716b5d",
+    "bytes": 14221
+  },
+  {
+    "repo": "mit-pdos/fscq",
+    "sha": "2c7ef9c268fd79a81b26b44ef720f8e6a1e938a0",
+    "path": "src/AsyncDisk.v",
+    "url": "https://github.com/mit-pdos/fscq/blob/2c7ef9c268fd79a81b26b44ef720f8e6a1e938a0/src/AsyncDisk.v",
+    "sha256": "faa74ee7503eab1ddbae812c3b93654ccb5f20561e241346ff87935d16022bf1",
+    "bytes": 4959
+  },
+  {
+    "repo": "mit-pdos/fscq",
+    "sha": "2c7ef9c268fd79a81b26b44ef720f8e6a1e938a0",
+    "path": "src/AsyncFSRecover.v",
+    "url": "https://github.com/mit-pdos/fscq/blob/2c7ef9c268fd79a81b26b44ef720f8e6a1e938a0/src/AsyncFSRecover.v",
+    "sha256": "91eef52d79d7da4ac8ef1302df9fa20bcbc4072ab95d265d97f672d38998b180",
+    "bytes": 20238
+  },
+  {
+    "repo": "mit-pdos/fscq",
+    "sha": "2c7ef9c268fd79a81b26b44ef720f8e6a1e938a0",
+    "path": "src/LogReplay.v",
+    "url": "https://github.com/mit-pdos/fscq/blob/2c7ef9c268fd79a81b26b44ef720f8e6a1e938a0/src/LogReplay.v",
+    "sha256": "300cf318d9179aa8cb7a35031339279914e70a38f24751d727a8a2831a9f8af0",
+    "bytes": 36064
+  },
+  {
+    "repo": "golemcloud/golem",
+    "sha": "490a77d835cfc02be386ec72b30f4e94ac74c2ca",
+    "path": "LICENSE",
+    "url": "https://github.com/golemcloud/golem/blob/490a77d835cfc02be386ec72b30f4e94ac74c2ca/LICENSE",
+    "sha256": "4b6bc9c96f838b31ebca414b07408b231a9ebbab9c27729c05f86ee1af513e60",
+    "bytes": 8893
+  },
+  {
+    "repo": "golemcloud/golem",
+    "sha": "490a77d835cfc02be386ec72b30f4e94ac74c2ca",
+    "path": "golem-worker-executor/src/durable_host/durability.rs",
+    "url": "https://github.com/golemcloud/golem/blob/490a77d835cfc02be386ec72b30f4e94ac74c2ca/golem-worker-executor/src/durable_host/durability.rs",
+    "sha256": "6f3dd73506b2b2e727ffc955275570c9429dd7d1e7856be583011c2ae7a528b1",
+    "bytes": 180813
+  },
+  {
+    "repo": "golemcloud/golem",
+    "sha": "490a77d835cfc02be386ec72b30f4e94ac74c2ca",
+    "path": "golem-worker-executor/src/durable_host/replay_state/rollback.rs",
+    "url": "https://github.com/golemcloud/golem/blob/490a77d835cfc02be386ec72b30f4e94ac74c2ca/golem-worker-executor/src/durable_host/replay_state/rollback.rs",
+    "sha256": "cfbe1dacd75012ea0069837fad80dcaa701952f706be6803e119ac5259fbae6c",
+    "bytes": 5509
+  },
+  {
+    "repo": "golemcloud/golem",
+    "sha": "490a77d835cfc02be386ec72b30f4e94ac74c2ca",
+    "path": "golem-worker-executor/src/durable_host/replay_state/mod.rs",
+    "url": "https://github.com/golemcloud/golem/blob/490a77d835cfc02be386ec72b30f4e94ac74c2ca/golem-worker-executor/src/durable_host/replay_state/mod.rs",
+    "sha256": "7b02985e8d1073276787d0b64618fccbd4d75dad4bc09f40c3f84551a7d78709",
+    "bytes": 23685
+  },
+  {
+    "repo": "golemcloud/golem",
+    "sha": "490a77d835cfc02be386ec72b30f4e94ac74c2ca",
+    "path": "golem-worker-executor/src/durable_host/replay_state/tests.rs",
+    "url": "https://github.com/golemcloud/golem/blob/490a77d835cfc02be386ec72b30f4e94ac74c2ca/golem-worker-executor/src/durable_host/replay_state/tests.rs",
+    "sha256": "1a8d14f156ba0509aa68c745e5245a72cfa14a1bf373fee518b89d89330fdabe",
+    "bytes": 306809
+  },
+  {
+    "repo": "wasmi-labs/wasmi",
+    "sha": "2970aa871cc1001b57b267ccecdcd1e42306199e",
+    "path": "crates/wasmi/tests/integration/fuel_metering.rs",
+    "url": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/crates/wasmi/tests/integration/fuel_metering.rs",
+    "sha256": "91b0e094b764ee34c03cfcb5b646dff778720dfff6e9a588ba5356ecdb139055",
+    "bytes": 3332
+  },
+  {
+    "repo": "dphilla/weave",
+    "sha": "55e36b5f5d5b31d14f1521c3a4327c248ddeba19",
+    "path": "README.md",
+    "url": "https://github.com/dphilla/weave/blob/55e36b5f5d5b31d14f1521c3a4327c248ddeba19/README.md",
+    "sha256": "124a7cd15c12e3dc0d1c9dbef785fa469b9729b1fdd38187c23132d842a2164b",
+    "bytes": 15138
+  },
+  {
+    "repo": "wasmi-labs/wasmi",
+    "sha": "2970aa871cc1001b57b267ccecdcd1e42306199e",
+    "path": "crates/core/Cargo.toml",
+    "url": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/crates/core/Cargo.toml",
+    "sha256": "d57bcf82d460bd0f8a4378445ef037a3e9e97b77acbe97737118ee64cf782407",
+    "bytes": 1252
+  },
+  {
+    "repo": "wasmi-labs/wasmi",
+    "sha": "2970aa871cc1001b57b267ccecdcd1e42306199e",
+    "path": "Cargo.toml",
+    "url": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/Cargo.toml",
+    "sha256": "82295ddf47f283b5a7496f858e3a37b2d5585368f9bc4514e146f676b563040e",
+    "bytes": 2001
+  },
+  {
+    "repo": "dphilla/weave",
+    "sha": "55e36b5f5d5b31d14f1521c3a4327c248ddeba19",
+    "path": "LICENSE",
+    "url": "https://github.com/dphilla/weave/blob/55e36b5f5d5b31d14f1521c3a4327c248ddeba19/LICENSE",
+    "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "bytes": 11357
+  },
+  {
+    "repo": "dphilla/weave",
+    "sha": "55e36b5f5d5b31d14f1521c3a4327c248ddeba19",
+    "path": "crates/weave-transform/tests/unsupported_features.rs",
+    "url": "https://github.com/dphilla/weave/blob/55e36b5f5d5b31d14f1521c3a4327c248ddeba19/crates/weave-transform/tests/unsupported_features.rs",
+    "sha256": "22d1afd46e2e3b3b7c38f358563b7bd5107f069d02c42f87b2b84aeb6617c5df",
+    "bytes": 7892
+  },
+  {
+    "repo": "dphilla/weave",
+    "sha": "55e36b5f5d5b31d14f1521c3a4327c248ddeba19",
+    "path": "crates/weave-transform/src/lib.rs",
+    "url": "https://github.com/dphilla/weave/blob/55e36b5f5d5b31d14f1521c3a4327c248ddeba19/crates/weave-transform/src/lib.rs",
+    "sha256": "40741ae2225921f98c408c8eb16047b7ed0fc66b7a4d74af3165cacc08fecc46",
+    "bytes": 3801
+  },
+  {
+    "repo": "dphilla/weave",
+    "sha": "55e36b5f5d5b31d14f1521c3a4327c248ddeba19",
+    "path": "crates/weave-core/src/snapshot.rs",
+    "url": "https://github.com/dphilla/weave/blob/55e36b5f5d5b31d14f1521c3a4327c248ddeba19/crates/weave-core/src/snapshot.rs",
+    "sha256": "36c09fa1689ee637e09daa289b55b9c70f12fe92742c97c9cffa9e20bba2522a",
+    "bytes": 11952
+  },
+  {
+    "repo": "bytecodealliance/wizer",
+    "sha": "61301504fd49c18ddd61c672231f6b280f6c37db",
+    "path": "README.md",
+    "url": "https://github.com/bytecodealliance/wizer/blob/61301504fd49c18ddd61c672231f6b280f6c37db/README.md",
+    "sha256": "5e8fe767619d7fa9a06c34579dbf44f96a9a7c4fcbf7e46a6e5e502264060d6a",
+    "bytes": 6476
+  },
+  {
+    "repo": "bytecodealliance/wizer",
+    "sha": "61301504fd49c18ddd61c672231f6b280f6c37db",
+    "path": "LICENSE",
+    "url": "https://github.com/bytecodealliance/wizer/blob/61301504fd49c18ddd61c672231f6b280f6c37db/LICENSE",
+    "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5",
+    "bytes": 12243
+  },
+  {
+    "repo": "haoyuwang99/AgentSpec",
+    "sha": "e6fa3902e2cfb9681f454b355691b771f70543f8",
+    "path": "README.md",
+    "url": "https://github.com/haoyuwang99/AgentSpec/blob/e6fa3902e2cfb9681f454b355691b771f70543f8/README.md",
+    "sha256": "0cc4bdc91dfffc6a4f3334753367d60e83964a1c32719b92284eb847a4e7c93e",
+    "bytes": 5154
+  },
+  {
+    "repo": "bytecodealliance/wizer",
+    "sha": "61301504fd49c18ddd61c672231f6b280f6c37db",
+    "path": "src/lib.rs",
+    "url": "https://github.com/bytecodealliance/wizer/blob/61301504fd49c18ddd61c672231f6b280f6c37db/src/lib.rs",
+    "sha256": "240179675fb71897104b9fc88b2bb34457ed6aa9cb73ba124343519d5e2df364",
+    "bytes": 159
+  },
+  {
+    "repo": "haoyuwang99/AgentSpec",
+    "sha": "e6fa3902e2cfb9681f454b355691b771f70543f8",
+    "path": "src/enforcement.py",
+    "url": "https://github.com/haoyuwang99/AgentSpec/blob/e6fa3902e2cfb9681f454b355691b771f70543f8/src/enforcement.py",
+    "sha256": "8be2b544ac6748685369407025f98e593bb957c69c62e757297a27ce5b26775d",
+    "bytes": 3204
+  },
+  {
+    "repo": "haoyuwang99/AgentSpec",
+    "sha": "e6fa3902e2cfb9681f454b355691b771f70543f8",
+    "path": "src/spec_lang/driver.py",
+    "url": "https://github.com/haoyuwang99/AgentSpec/blob/e6fa3902e2cfb9681f454b355691b771f70543f8/src/spec_lang/driver.py",
+    "sha256": "a5f779a26fc65f1b4fe36f49851c067d43b29c223fb6b5238bf54d4769f7a3ae",
+    "bytes": 373
+  },
+  {
+    "repo": "microsoft/verified-storage",
+    "sha": "41cab95051229ebd457b4eed7fc111e3e7c9099c",
+    "path": "README.md",
+    "url": "https://github.com/microsoft/verified-storage/blob/41cab95051229ebd457b4eed7fc111e3e7c9099c/README.md",
+    "sha256": "cfc1c29af0704758548c1b60412b5e8c14b6a7f146e7d170e4f0ce315dc25034",
+    "bytes": 2792
+  },
+  {
+    "repo": "haoyuwang99/AgentSpec",
+    "sha": "e6fa3902e2cfb9681f454b355691b771f70543f8",
+    "path": "src/spec_lang/AgentSpec.g4",
+    "url": "https://github.com/haoyuwang99/AgentSpec/blob/e6fa3902e2cfb9681f454b355691b771f70543f8/src/spec_lang/AgentSpec.g4",
+    "sha256": "3ce4f27e8480465ddbdc812bc1ae0ff9e38fab8cfa83f9c74e63be0ae7881421",
+    "bytes": 2491
+  },
+  {
+    "repo": "microsoft/verified-storage",
+    "sha": "41cab95051229ebd457b4eed7fc111e3e7c9099c",
+    "path": "capybaraKV/capybarakv/src/pmem/power_v.rs",
+    "url": "https://github.com/microsoft/verified-storage/blob/41cab95051229ebd457b4eed7fc111e3e7c9099c/capybaraKV/capybarakv/src/pmem/power_v.rs",
+    "sha256": "2e6d89794d69d0d1b6e44c36278314974897814cbb217f55a6351e7f51f5e6a3",
+    "bytes": 10547
+  },
+  {
+    "repo": "microsoft/verified-storage",
+    "sha": "41cab95051229ebd457b4eed7fc111e3e7c9099c",
+    "path": "LICENSE.txt",
+    "url": "https://github.com/microsoft/verified-storage/blob/41cab95051229ebd457b4eed7fc111e3e7c9099c/LICENSE.txt",
+    "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+    "bytes": 1141
+  },
+  {
+    "repo": "microsoft/verified-storage",
+    "sha": "41cab95051229ebd457b4eed7fc111e3e7c9099c",
+    "path": "capybaraKV/capybarakv/src/pmem/power_t.rs",
+    "url": "https://github.com/microsoft/verified-storage/blob/41cab95051229ebd457b4eed7fc111e3e7c9099c/capybaraKV/capybarakv/src/pmem/power_t.rs",
+    "sha256": "b4c00dad579b778722ae9d7edd566a1c02b9de8ef84eb44dbccb5dd0b9bf6086",
+    "bytes": 5384
+  },
+  {
+    "repo": "microsoft/verified-storage",
+    "sha": "41cab95051229ebd457b4eed7fc111e3e7c9099c",
+    "path": "capybaraKV/capybarakv/src/pmem/crashinv_t.rs",
+    "url": "https://github.com/microsoft/verified-storage/blob/41cab95051229ebd457b4eed7fc111e3e7c9099c/capybaraKV/capybarakv/src/pmem/crashinv_t.rs",
+    "sha256": "9dc78ca858096a726a9733ea166d665c2a80a051b7884d85006cad94d73f445c",
+    "bytes": 2978
+  },
+  {
+    "repo": "oxidecomputer/hubris",
+    "sha": "e8a43a75ba92a654979218a9527bfe6a4f33e382",
+    "path": "sys/abi/src/lib.rs",
+    "url": "https://github.com/oxidecomputer/hubris/blob/e8a43a75ba92a654979218a9527bfe6a4f33e382/sys/abi/src/lib.rs",
+    "sha256": "0a9a5d88b6825ce82db4816f7cf380c020651fe3a21332ae2262229423c7dd63",
+    "bytes": 19949
+  },
+  {
+    "repo": "oxidecomputer/hubris",
+    "sha": "e8a43a75ba92a654979218a9527bfe6a4f33e382",
+    "path": "sys/kern/src/task.rs",
+    "url": "https://github.com/oxidecomputer/hubris/blob/e8a43a75ba92a654979218a9527bfe6a4f33e382/sys/kern/src/task.rs",
+    "sha256": "f55b3a1f5bd1126d04fa85024ca54b15fedcded670222a170a40469e9fff3033",
+    "bytes": 33452
+  },
+  {
+    "repo": "oxidecomputer/hubris",
+    "sha": "e8a43a75ba92a654979218a9527bfe6a4f33e382",
+    "path": "LICENSE.txt",
+    "url": "https://github.com/oxidecomputer/hubris/blob/e8a43a75ba92a654979218a9527bfe6a4f33e382/LICENSE.txt",
+    "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+    "bytes": 16726
+  },
+  {
+    "repo": "oxidecomputer/hubris",
+    "sha": "e8a43a75ba92a654979218a9527bfe6a4f33e382",
+    "path": "README.mkdn",
+    "url": "https://github.com/oxidecomputer/hubris/blob/e8a43a75ba92a654979218a9527bfe6a4f33e382/README.mkdn",
+    "sha256": "7820ea4c944bb1e5b22dce7ac505c1fc3fa86f4c18c118f5f038692985ec399d",
+    "bytes": 28628
+  },
+  {
+    "repo": "oxidecomputer/hubris",
+    "sha": "e8a43a75ba92a654979218a9527bfe6a4f33e382",
+    "path": "sys/kern/src/syscalls.rs",
+    "url": "https://github.com/oxidecomputer/hubris/blob/e8a43a75ba92a654979218a9527bfe6a4f33e382/sys/kern/src/syscalls.rs",
+    "sha256": "09fae9860514e2775280110e27bb4938209cd30517c6da716a09a42c978e7075",
+    "bytes": 35927
+  },
+  {
+    "repo": "oxidecomputer/hubris",
+    "sha": "e8a43a75ba92a654979218a9527bfe6a4f33e382",
+    "path": "task/jefe/src/main.rs",
+    "url": "https://github.com/oxidecomputer/hubris/blob/e8a43a75ba92a654979218a9527bfe6a4f33e382/task/jefe/src/main.rs",
+    "sha256": "29002be5811ae30887b706fa8cfda9b1d44a60d9d29166eca9205c2c47169239",
+    "bytes": 21601
+  },
+  {
+    "repo": "mars-research/redleaf",
+    "sha": "7194295d1968c8013ae6b3d104a9192f03516449",
+    "path": "README.md",
+    "url": "https://github.com/mars-research/redleaf/blob/7194295d1968c8013ae6b3d104a9192f03516449/README.md",
+    "sha256": "d98d33e2e030e63240254b969bf0f1e7c0fb2b21da2a869887a726abf42fc560",
+    "bytes": 2077
+  },
+  {
+    "repo": "mars-research/redleaf",
+    "sha": "7194295d1968c8013ae6b3d104a9192f03516449",
+    "path": "domains/usr/shadow/bdev/src/lib.rs",
+    "url": "https://github.com/mars-research/redleaf/blob/7194295d1968c8013ae6b3d104a9192f03516449/domains/usr/shadow/bdev/src/lib.rs",
+    "sha256": "96ddbf638a1bbcfc6160155c4f83d9a1c5d931d805804758d95568607d8e5bc2",
+    "bytes": 3776
+  },
+  {
+    "repo": "mars-research/redleaf",
+    "sha": "7194295d1968c8013ae6b3d104a9192f03516449",
+    "path": "domains/usr/shadow/nvme/src/lib.rs",
+    "url": "https://github.com/mars-research/redleaf/blob/7194295d1968c8013ae6b3d104a9192f03516449/domains/usr/shadow/nvme/src/lib.rs",
+    "sha256": "01f5651a2946eb72dcbf6502609dc54d2d5c83ed3c74adaeb08db460b26375d1",
+    "bytes": 2133
+  },
+  {
+    "repo": "mars-research/redleaf",
+    "sha": "7194295d1968c8013ae6b3d104a9192f03516449",
+    "path": "domains/usr/test/shadow/src/lib.rs",
+    "url": "https://github.com/mars-research/redleaf/blob/7194295d1968c8013ae6b3d104a9192f03516449/domains/usr/test/shadow/src/lib.rs",
+    "sha256": "175b469bdf8b65e62c008592f38e0c368ea351a22b0522dfd8330da680ce6ab2",
+    "bytes": 2649
+  },
+  {
+    "repo": "mars-research/redleaf",
+    "sha": "7194295d1968c8013ae6b3d104a9192f03516449",
+    "path": "tools/foliage/README.md",
+    "url": "https://github.com/mars-research/redleaf/blob/7194295d1968c8013ae6b3d104a9192f03516449/tools/foliage/README.md",
+    "sha256": "b2796fc6b30d833f09d4b9e061c844cbc6ba1d0b1154aa30ba9129a7d464bb3c",
+    "bytes": 119
+  }
+]

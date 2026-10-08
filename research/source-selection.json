@@ -1,0 +1,11 @@
+{
+  "seL4/seL4": ["src/object/cnode.c", "src/object/endpoint.c", "src/kernel/thread.c", "src/fastpath/fastpath.c", "LICENSES/GPL-2.0-only.txt"],
+  "seL4/microkit": ["docs/manual.md", "monitor/src/main.c", "libmicrokit/src/main.c", "tool/microkit/src/sdf.rs", "tool/microkit/src/sdf/domains.rs", "LICENSES/BSD-2-Clause.txt"],
+  "theseus-os/Theseus": ["README.md", "LICENSE-MIT", "kernel/fault_crate_swap/src/lib.rs", "kernel/state_store/src/lib.rs", "kernel/catch_unwind/src/lib.rs", "applications/test_restartable/src/lib.rs"],
+  "wasmi-labs/wasmi": ["crates/wasmi/Cargo.toml", "crates/wasmi/src/engine/config.rs", "crates/wasmi/src/engine/resumable.rs", "crates/wasmi/src/store/mod.rs", "crates/wasmi/src/limiter.rs", "crates/wasmi/tests/integration/resumable_call.rs", "crates/core/src/fuel.rs", "LICENSE-MIT"],
+  "rr-debugger/rr": ["src/RecordSession.cc", "src/ReplaySession.cc", "src/PerfCounters.cc", "src/TraceStream.h", "LICENSE"],
+  "cberner/redb": ["README.md", "Cargo.toml", "docs/design.md", "src/tree_store/page_store/header.rs", "src/tree_store/page_store/savepoint.rs", "src/transactions.rs", "tests/crash_consistency.rs", "crates/redb-no-std-test/Cargo.toml", "LICENSE-MIT"],
+  "littlefs-project/littlefs": ["DESIGN.md", "SPEC.md", "bd/lfs_emubd.c", "tests/test_powerloss.toml", "tests/test_exhaustion.toml", "LICENSE.md"],
+  "mit-pdos/fscq": ["README.md", "LICENSE", "src/Hoare.v", "src/AsyncDisk.v", "src/LogReplay.v", "src/AsyncFSRecover.v"],
+  "golemcloud/golem": ["LICENSE", "golem-worker-executor/src/durable_host/durability.rs", "golem-worker-executor/src/durable_host/replay_state/mod.rs", "golem-worker-executor/src/durable_host/replay_state/rollback.rs", "golem-worker-executor/src/durable_host/replay_state/tests.rs"]
+}

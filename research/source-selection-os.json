@@ -1,0 +1,17 @@
+{
+  "oxidecomputer/hubris": [
+    "README.mkdn",
+    "LICENSE.txt",
+    "sys/abi/src/lib.rs",
+    "sys/kern/src/task.rs",
+    "sys/kern/src/syscalls.rs",
+    "task/jefe/src/main.rs"
+  ],
+  "mars-research/redleaf": [
+    "README.md",
+    "domains/usr/shadow/bdev/src/lib.rs",
+    "domains/usr/shadow/nvme/src/lib.rs",
+    "domains/usr/test/shadow/src/lib.rs",
+    "tools/foliage/README.md"
+  ]
+}

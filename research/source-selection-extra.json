@@ -1,0 +1,7 @@
+{
+  "wasmi-labs/wasmi": ["Cargo.toml", "crates/wasmi/tests/integration/fuel_metering.rs", "crates/core/Cargo.toml"],
+  "dphilla/weave": ["README.md", "LICENSE", "crates/weave-transform/src/lib.rs", "crates/weave-core/src/snapshot.rs", "crates/weave-transform/tests/unsupported_features.rs"],
+  "bytecodealliance/wizer": ["README.md", "LICENSE", "src/lib.rs"],
+  "haoyuwang99/AgentSpec": ["README.md", "src/enforcement.py", "src/spec_lang/AgentSpec.g4", "src/spec_lang/driver.py"],
+  "microsoft/verified-storage": ["README.md", "LICENSE.txt", "capybaraKV/capybarakv/src/pmem/power_t.rs", "capybaraKV/capybarakv/src/pmem/power_v.rs", "capybaraKV/capybarakv/src/pmem/crashinv_t.rs"]
+}
