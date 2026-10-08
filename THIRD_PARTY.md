@@ -20,6 +20,7 @@ The ignored `.tools` directory is a build cache. The runner verifies the bootloa
 | uart_16550 | 0.8.1 | [rust-osdev/uart_16550](https://github.com/rust-osdev/uart_16550) | MIT OR Apache-2.0 | Serial driver |
 | pic8259 | 0.11.0 | [rust-osdev/pic8259](https://github.com/rust-osdev/pic8259) | Apache-2.0 / MIT | Legacy PIC initialization and interrupt acknowledgment |
 | spin | 0.12.3 | [zesterer/spin](https://codeberg.org/zesterer/spin) | MIT | Allocation-free synchronization and lazy static initialization |
+| bitflags | 2.13.2 | [bitflags/bitflags](https://github.com/bitflags/bitflags) | MIT OR Apache-2.0 | Typed capability rights |
 
 The source research cache is not incorporated into the implementation. Research references such as seL4, Theseus, RedLeaf, Golem, and AgentSpec are not vendored dependencies. Reuse decisions are made per component; a public repository is not automatically permission to redistribute its code under MIT.
 

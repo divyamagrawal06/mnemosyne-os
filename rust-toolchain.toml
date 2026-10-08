@@ -3,4 +3,3 @@ channel = "nightly-2025-12-01"
 profile = "minimal"
 components = ["rustfmt", "clippy"]
 targets = ["x86_64-unknown-none"]
-

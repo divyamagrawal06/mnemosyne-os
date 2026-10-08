@@ -30,10 +30,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "mnemosyne-capability"
+version = "0.1.0"
+dependencies = [
+ "bitflags",
+]
+
+[[package]]
 name = "mnemosyne-kernel"
 version = "0.1.0"
 dependencies = [
  "limine",
+ "mnemosyne-capability",
  "pic8259",
  "spin",
  "uart_16550",

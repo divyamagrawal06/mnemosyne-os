@@ -65,6 +65,7 @@ extern "C" fn kmain() -> ! {
         assert_eq!(b.read_volatile(), 0x4348524f4e49434c);
     }
     serialln!("{{\"event\":\"frames_ok\",\"count\":2}}");
+    capability_smoke();
     arch::initialize();
     arch::breakpoint_smoke();
     serialln!("{{\"event\":\"exception_ok\",\"vector\":3}}");
@@ -72,6 +73,34 @@ extern "C" fn kmain() -> ! {
     serialln!("{{\"event\":\"timer_ok\",\"ticks\":{ticks}}}");
     serialln!("{{\"event\":\"boot_ok\"}}");
     exit_qemu(0x10)
+}
+
+fn capability_smoke() {
+    use mnemosyne_capability::{Error, ObjectKind, Rights, Table};
+    let mut table = Table::<8>::new();
+    let root = table
+        .mint_root(
+            1,
+            ObjectKind::Memory,
+            Rights::READ | Rights::WRITE | Rights::DELEGATE | Rights::REVOKE,
+        )
+        .unwrap();
+    let child = table.delegate(root, Rights::READ).unwrap();
+    assert!(
+        table
+            .resolve(child, ObjectKind::Memory, Rights::READ)
+            .is_ok()
+    );
+    assert_eq!(
+        table.resolve(child, ObjectKind::Memory, Rights::WRITE),
+        Err(Error::Denied)
+    );
+    assert_eq!(table.revoke_descendants(root), Ok(1));
+    assert_eq!(
+        table.resolve(child, ObjectKind::Memory, Rights::READ),
+        Err(Error::InvalidHandle)
+    );
+    serialln!("{{\"event\":\"capabilities_ok\"}}");
 }
 
 fn exit_qemu(code: u32) -> ! {

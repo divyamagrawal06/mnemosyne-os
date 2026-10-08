@@ -88,10 +88,10 @@ def smoke():
     (BUILD / "boot.log").write_text(output, encoding="utf-8")
     print(output, end="")
     events = [json.loads(line) for line in result.stdout.splitlines() if line.startswith('{"event":')]
-    required = {"boot", "memory", "frames_ok", "exception_ok", "timer_ok", "boot_ok"}
+    required = {"boot", "memory", "frames_ok", "capabilities_ok", "exception_ok", "timer_ok", "boot_ok"}
     if result.returncode != 33 or not required <= {e["event"] for e in events}:
         raise RuntimeError(f"kernel smoke failed (QEMU status {result.returncode}); see build/boot.log")
-    print("Kernel smoke passed: memory, exception, and timer checks.")
+    print("Kernel smoke passed: memory, capability, exception, and timer checks.")
 
 
 def main():

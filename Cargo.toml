@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
-members = ["kernel"]
-default-members = ["kernel"]
+members = ["kernel", "crates/capability"]
+default-members = ["crates/capability"]
 
 [workspace.package]
 version = "0.1.0"
@@ -15,4 +15,3 @@ panic = "abort"
 panic = "abort"
 lto = "thin"
 codegen-units = 1
-

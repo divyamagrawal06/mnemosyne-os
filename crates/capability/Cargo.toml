@@ -1,0 +1,8 @@
+[package]
+name = "mnemosyne-capability"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+bitflags = { version = "=2.13.2", default-features = false }
