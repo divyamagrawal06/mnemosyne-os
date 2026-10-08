@@ -1,0 +1,26 @@
+# Third-party code and dependencies
+
+MnemosyneOS reuses upstream implementations through Cargo where possible. `Cargo.lock` records exact resolved packages and registry checksums. Original project code is MIT licensed; that does not replace upstream licenses.
+
+## Copied and adapted files
+
+| Origin | Pinned revision | Local use | License and changes |
+| --- | --- | --- | --- |
+| [Limine Rust template](https://github.com/jasondyoungberg/limine-rust-template/tree/ce82375f39a8e8ae85fbee1d1b147290cd6670c8) | `ce82375f39a8e8ae85fbee1d1b147290cd6670c8` | `kernel/linker-x86_64.ld`, boot request layout in `kernel/src/main.rs`, `kernel/build.rs` | 0BSD. Linker script copied; boot example adapted to serial/memory diagnostics; build script uses an absolute path and checks the target. Notice retained in `third_party/licenses/limine-rust-template-0BSD.txt`. |
+| [Limine binary distribution](https://github.com/limine-bootloader/limine/tree/7a9013f305de0bea1f6310e76e7baba30499fef0) | `v10.8.5-binary`, commit `7a9013f305de0bea1f6310e76e7baba30499fef0` | Downloaded to `.tools/limine`; BIOS/UEFI boot files included in the generated ISO | BSD-2-Clause. Unmodified boot files; installer compiled from upstream `limine.c`. License retained locally and included in the ISO. |
+
+The ignored `.tools` directory is a build cache. The runner verifies the bootloader commit before image construction. No downloaded template build script is executed; the project runner builds the selected Limine installer target.
+
+## Direct Cargo dependencies
+
+| Package | Version | Upstream | Declared license | Purpose |
+| --- | --- | --- | --- | --- |
+| limine | 0.5.0 | [limine-rs](https://github.com/limine-bootloader/limine-rs) | MIT OR Apache-2.0 | Boot protocol structures matching the reused template |
+| x86_64 | 0.15.4 | [rust-osdev/x86_64](https://github.com/rust-osdev/x86_64) | MIT / Apache-2.0 | Descriptors, interrupt tables, CPU instructions, port I/O |
+| uart_16550 | 0.8.1 | [rust-osdev/uart_16550](https://github.com/rust-osdev/uart_16550) | MIT OR Apache-2.0 | Serial driver |
+| pic8259 | 0.11.0 | [rust-osdev/pic8259](https://github.com/rust-osdev/pic8259) | Apache-2.0 / MIT | Legacy PIC initialization and interrupt acknowledgment |
+| spin | 0.12.3 | [zesterer/spin](https://codeberg.org/zesterer/spin) | MIT | Allocation-free synchronization and lazy static initialization |
+
+The source research cache is not incorporated into the implementation. Research references such as seL4, Theseus, RedLeaf, Golem, and AgentSpec are not vendored dependencies. Reuse decisions are made per component; a public repository is not automatically permission to redistribute its code under MIT.
+
+QEMU, xorriso, Git, the Rust toolchain, and the C compiler are external development tools. Their code is not compiled into the kernel. The first tested boot path uses QEMU's BIOS/SeaBIOS; the ISO also contains Limine's UEFI files, but that alone does not establish a tested UEFI boot.

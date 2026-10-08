@@ -2,7 +2,29 @@
 
 A research Rust microkernel investigating capability isolation, deterministic service replay, and policy-checked recovery.
 
-Development begins with a bootable x86-64 kernel and host-testable core libraries. The research proposal describes the intended system; it is not a claim that all features are implemented.
+The x86-64 kernel boots through Limine in QEMU and checks serial output, usable physical frames, breakpoint handling, and PIT timer interrupts. The research proposal describes the intended system; it is not a claim that all features are implemented. Userspace, process scheduling, IPC, persistent storage, and recovery are subsequent milestones.
+
+## Build and boot
+
+Install Rust/rustup, Python 3, and Git on the build host. The pinned Rust toolchain and `x86_64-unknown-none` target are declared in `rust-toolchain.toml`.
+
+The image tools and QEMU run on Linux, or in the existing Ubuntu WSL distribution on Windows:
+
+```sh
+sudo apt-get update
+sudo apt-get install --no-install-recommends build-essential qemu-system-x86 xorriso
+```
+
+From the repository root:
+
+```sh
+python tools/dev.py build
+python tools/dev.py boot
+```
+
+`boot` builds the kernel and an ISO, runs a headless 1-vCPU/256-MiB QEMU instance, verifies serial events and the exit status, and terminates the test VM. A timeout fails the test. Output is retained in `build/boot.log`; the image is `build/mnemosyne.iso`. Windows builds use native Cargo and WSL only for image construction and emulation. Set `MNEMOSYNE_WSL_DISTRO` to select another configured distribution.
+
+The runner downloads a pinned Limine binary distribution into `.tools/limine` on first use. See [third-party attribution](THIRD_PARTY.md). BIOS boot is tested; UEFI files are included but UEFI boot is not yet tested.
 
 ## Research
 
