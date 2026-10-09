@@ -95,6 +95,10 @@ the guest shell. See the [UI guide](ui/README.md).
 
 ## Presentation and research
 
+- [Review I guide and rubric](docs/review-one-guide.md),
+  [Review I PowerPoint](presentation/output/mnemosyne-os-review-one.pptx),
+  [PDF](presentation/output/mnemosyne-os-review-one.pdf), and
+  [speaker notes](presentation/output/mnemosyne-os-review-one-speaker-notes.md)
 - [Professor brief](docs/professor-brief.md) and [cloud demo runbook](docs/cloud-demo.md)
 - [Original PowerPoint](presentation/output/mnemosyne-os-pitch.pptx),
   [PDF](presentation/output/mnemosyne-os-pitch.pdf), and
@@ -103,8 +107,9 @@ the guest shell. See the [UI guide](ui/README.md).
   [repository source guide](docs/source-reading-guide.md)
 - [Third-party versions and licenses](THIRD_PARTY.md)
 
-The original deck preserves its proposal-stage `44b739d` baseline. Current
-capabilities are described in the brief and runbook. New paths and commands use
+The Review I deck covers the integrated `f09a431` implementation and identifies
+team ownership and the completion denominator as pending. The original pitch
+preserves its proposal-stage `44b739d` baseline. New paths and commands use
 kebab-case; language identifiers and conventional filenames retain their forms.
 
 Original code is MIT licensed. Reused dependencies retain their own licenses.

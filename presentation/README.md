@@ -1,6 +1,36 @@
 # MnemosyneOS presentation package
 
-Current integrated OS demo: [cloud and guest runbook](../docs/cloud-demo.md). The original deck and saved browser evidence retain their earlier baseline.
+## Review I: current integrated OS
+
+Use the [Review I PowerPoint](output/mnemosyne-os-review-one.pptx),
+[PDF](output/mnemosyne-os-review-one.pdf) and
+[speaker notes](output/mnemosyne-os-review-one-speaker-notes.md) for the department's
+review. The 24-slide deck covers the supplied rubric. Slides 1–22 are the main
+presentation; 23–24 are backup questions and references. Architecture and
+algorithm diagrams, tables and text remain editable.
+
+The [Review I guide](../docs/review-one-guide.md) maps each requirement to evidence,
+contains the full guest demo, and explains the actual process boundaries. Team
+member names remain unassigned. Full-project completion has not been quantified:
+the six passing prototype acceptance gates do not establish the required 60–70%
+of the final proposal. Agree the final acceptance criteria before claiming that
+percentage.
+
+The deck uses implementation baseline `f09a431` and recorded guest evidence from
+`1bc81f1`. It labels saved results as recorded and provides commands for a fresh
+live run. Use the [cloud and guest runbook](../docs/cloud-demo.md) to prepare the
+non-Azure Linux VM. No new cloud resource is provisioned by these tools.
+
+Rebuild with `build-review-one.mjs` using the same runtime arguments shown below
+for `build-deck.mjs`, and a **new** `--output` filename. The builder also creates
+matching speaker notes. Export its PDF with `export-powerpoint.ps1`, passing the
+new PPTX/PDF paths and `-PreviewDirectory ..\build\review-one\powerpoint`.
+Intermediate renderings and validation receipts stay under ignored
+`build/review-one/`.
+
+## Archived proposal-stage pitch
+
+The original deck and saved browser evidence retain their earlier baseline.
 
 Open the [editable PowerPoint](output/mnemosyne-os-pitch.pptx) for presenting and the [PDF copy](output/mnemosyne-os-pitch.pdf) for sharing. The deck has 30 slides: slides 1-22 are the main pitch, and slides 23-30 contain technical backup, review questions, the original proposal, and references. All slides include speaker notes with narration and source links. A separate [speaker-notes document](output/mnemosyne-os-speaker-notes.md) is convenient for rehearsal; the viewing PDF does not include notes.
 
@@ -17,7 +47,10 @@ python tools/present.py
 
 Press Enter before each act: kernel boot in QEMU, capability/replay tests, and a host Wasmi checkpoint/replay experiment. The script stops if a command fails. For rehearsal use `--auto`; for host tests and replay without QEMU use `--host-only`; for explicitly labeled saved output use `--recorded`.
 
-The current interface is a CLI and serial output. The kernel and host replay experiment are separate. The deck marks process isolation, ChronicleFS, durable recovery, the AI plan verifier, and the benchmark dashboard as proposed work.
+At this archived baseline, the interface was CLI/serial output and the kernel and
+host replay experiment were separate. This original deck marks process
+isolation, ChronicleFS, durable recovery, the AI plan verifier, and the benchmark
+dashboard as proposed work. Use the Review I deck for current implementation.
 
 ## Contents and provenance
 
