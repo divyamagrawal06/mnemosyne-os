@@ -1,0 +1,47 @@
+limine: Loading executable `boot():/boot/mnemosyne-kernel`...
+{"event":"boot","kernel":"mnemosyne","abi":1}
+{"event":"memory","regions":14,"usable_bytes":246775808}
+{"event":"frames_ok","count":2}
+{"event":"capabilities_ok"}
+{"event":"paging_ok","fault_probes":3}
+{"event":"exception_ok","vector":3}
+{"event":"timer_ok","ticks":5}
+{"event":"boot_ok"}
+{"event":"userspace-ready","tasks":4,"privilege":3,"scheduler":"round-robin-100hz"}
+
+mnemosyne-os 0.1 / x86-64 / ring-3 console
+4 protected tasks | preemptive scheduler | capability IPC | chronicle-fs
+chronicle-fs mounted: generation=1 retained=1
+Type help for commands, demo for the full demonstration, shutdown to exit.
+mnemosyne-os> demo
+[1/6] scheduling and isolated IPC
+{"event":"ipc-demo","passed":true,"counter":6,"hog-preemptions":14}
+[2/6] syscall authority and bad pointers
+{"event":"capability-demo","passed":true,"rejections":5}
+[3/6] CPU fault containment
+{"event":"task-fault","pid":4,"vector":14,"error":5,"rip":4424471,"address":18446744071562067968}
+{"event":"task-fault","pid":4,"vector":6,"error":0,"rip":4424368,"address":1073741824}
+{"event":"task-fault","pid":4,"vector":13,"error":0,"rip":4424451,"address":1073741824}
+{"event":"fault-demo","passed":true,"contained":3}
+[4/6] native service copy-on-write checkpoint and IPC replay
+{"event":"cow-replay","passed":true,"messages":2,"page-copies":2,"stale-capability-rejected":true}
+[5/6] persistent filesystem and snapshot restore
+{"event":"filesystem-demo","passed":true,"restored-generation":3}
+[6/6] Wasm fault, durable checkpoint, verified plan, replay and resume
+wasm: recording 12 requests and 60 events; injecting a trap...
+wasm: failed instance discarded; checkpoint, trace, and candidate plan committed to disk.
+{"event":"wasm-recovery","passed":true,"requests":12,"events":60,"state-equal":true,"effects-equal":true,"elapsed-ticks":0}
+recovered-sha256=30097fe2565ba3716a1aa8c0699c8614caa27b9ca0edcc493a4d60b790a2da11
+{"event":"guest-demo","passed":true}
+mnemosyne-os> ps
+pid  service          state       switches  preemptions  faults  epoch
+1    init-console     ready       103          85         0       1
+2    counter-service  receive     12          0         0       3
+3    cpu-hog          ready       119          119         0       1
+4    fault-service    dead        4          0         3       4
+mnemosyne-os> plan-show
+{"version":1,"action":"restore-replay","service":"kv-service","epoch":6,"checkpoint-sha256":"199be84bfeb8ac4fb383fbac7a9c46f5795a2768843673d5346b5b814d754a3d","max-events":60,"fuel-per-request":10000,"memory-pages":1,"requested-rights":3,"require-rollback":true}
+mnemosyne-os> write persistence-proof.txt survived-reboot
+committed generation=8
+mnemosyne-os> shutdown
+{"event":"guest-shutdown","status":0}

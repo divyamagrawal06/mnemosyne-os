@@ -1,0 +1,30 @@
+limine: Loading executable `boot():/boot/mnemosyne-kernel`...
+{"event":"boot","kernel":"mnemosyne","abi":1}
+{"event":"memory","regions":14,"usable_bytes":246824960}
+{"event":"frames_ok","count":2}
+{"event":"capabilities_ok"}
+{"event":"paging_ok","fault_probes":3}
+{"event":"exception_ok","vector":3}
+{"event":"timer_ok","ticks":5}
+{"event":"boot_ok"}
+{"event":"userspace-ready","tasks":4,"privilege":3,"scheduler":"round-robin-100hz"}
+
+mnemosyne-os 0.1 / x86-64 / ring-3 console
+4 protected tasks | preemptive scheduler | capability IPC | chronicle-fs
+chronicle-fs mounted: generation=8 retained=8
+Type help for commands, demo for the full demonstration, shutdown to exit.
+mnemosyne-os> cat persistence-proof.txt
+survived-reboot
+mnemosyne-os> cat demo-note.txt
+before-change
+mnemosyne-os> write rejected-plan.json {"version":1,"action":"restore-replay","service":"kv-service","epoch":6,"checkpoint-sha256":"199be84bfeb8ac4fb383fbac7a9c46f5795a2768843673d5346b5b814d754a3d","max-events":60,"fuel-per-request":10000,"memory-pages":1,"requested-rights":255,"require-rollback":true}
+committed generation=9
+mnemosyne-os> verify-plan rejected-plan.json
+error: plan rejected: PrivilegeAmplification
+mnemosyne-os> recover
+{"event":"wasm-recovery","passed":true,"requests":12,"events":60,"state-equal":true,"effects-equal":true,"elapsed-ticks":12}
+recovered-sha256=30097fe2565ba3716a1aa8c0699c8614caa27b9ca0edcc493a4d60b790a2da11
+mnemosyne-os> kv-add 1 2
+kv-service key=1 value=180 (live; run recover to restore durable bundle)
+mnemosyne-os> shutdown
+{"event":"guest-shutdown","status":0}

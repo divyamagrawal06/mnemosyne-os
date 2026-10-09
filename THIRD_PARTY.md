@@ -48,3 +48,10 @@ policy verifier and guest shell are original project code. ELF page mapping reus
 the upstream `x86_64` crate; the allocator and Wasmi engine are not forked.
 `tools/package-demo.py` includes registry dependency license/notice files and
 records declared license expressions in the bundle manifest.
+
+Some published Wasmi/wasm-tools crates omit repository-root license files. Their
+notices are retained in `third-party/licenses` from the exact revisions recorded
+in the crates' `.cargo_vcs_info.json`; `upstream-notices.json` records source URLs,
+blob identities and digests. pic8259's pinned README retains its licensing and
+authorship statement; its Apache-2.0 option is distributed with the standard
+Apache text. The packager fails if a dependency has no retained notice.

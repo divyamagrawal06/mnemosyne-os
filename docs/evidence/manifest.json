@@ -1,0 +1,15 @@
+{
+  "recorded-at": "2026-10-09T07:18:25.765818+00:00",
+  "source-commit": "1bc81f15606e7ce8465111ad7858d49d1f20455e",
+  "source-dirty": false,
+  "host": "Ubuntu WSL; native Linux Python/QEMU, prebuilt release ISO",
+  "qemu-vcpus": 1,
+  "qemu-memory-mib": 256,
+  "iso-sha256": "849a71cce8b08ce174fc130d943d7c171b078d6ea6b7c14fcf6136e59967fbe5",
+  "result": "passed",
+  "files": {
+    "guest-demo.log": "b34afe014de908c318f2cdf31f9de38ceea1e32f36bdc20d08ff701b606e7e16",
+    "guest-reboot.log": "b594a2f944a9a35ac670aac95b63ab820c655d24aff6dfd6abaf5aba8c2a5360"
+  },
+  "note": "Recorded evidence. tools/run-image.py --self-test executes a new test; it does not read these logs."
+}

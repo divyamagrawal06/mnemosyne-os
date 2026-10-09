@@ -27,6 +27,8 @@ def main():
     for name in ["tools/dev.py", "tools/run-image.py", "tools/ai-plan.py", "README.md", "LICENSE",
                  "THIRD_PARTY.md", "docs/cloud-demo.md", "docs/professor-brief.md", "docs/implementation-status.md"]:
         files[name] = dev.ROOT / name
+    for path in (dev.ROOT / "docs/evidence").glob("*"):
+        files["docs/evidence/" + path.name] = path
     for path in (dev.ROOT / "third-party/licenses").glob("*"):
         files["licenses/project/" + path.name] = path
     metadata = json.loads(subprocess.check_output(["cargo", "metadata", "--locked", "--format-version", "1"], cwd=dev.ROOT))
@@ -37,9 +39,26 @@ def main():
         base = Path(package["manifest_path"]).parent
         label = package["name"] + "-" + package["version"]
         notices = sorted({p for pattern in ("LICENSE*", "LICENCE*", "COPYING*", "NOTICE*") for p in base.glob(pattern) if p.is_file()})
+        paths = []
         for notice in notices:
-            files[f"licenses/dependencies/{label}/{notice.name}"] = notice
-        dependencies.append({"package": label, "license": package.get("license"), "notice-files": [p.name for p in notices]})
+            destination = f"licenses/dependencies/{label}/{notice.name}"
+            files[destination] = notice
+            paths.append(destination)
+        if not notices:
+            if package["name"] in {"wasmi", "wasmi_core", "wasmi_ir", "wasmi_collections"}:
+                supplemental = ["wasmi-mit.txt", "wasmi-apache.txt"]
+            elif package["name"] in {"wat", "wast", "wasm-encoder", "wasmparser"}:
+                supplemental = ["wasm-tools-mit.txt", "wasm-tools-apache.txt", "wasm-tools-llvm-exception.txt"]
+            elif package["name"] == "pic8259":
+                supplemental = ["pic8259-readme.md", "apache-2.0.txt"]
+            else:
+                parser.error(f"Missing dependency license notice: {label}")
+            for name in supplemental:
+                destination = "licenses/project/" + name
+                if destination not in files:
+                    parser.error(f"Missing retained upstream notice: {name}")
+                paths.append(destination)
+        dependencies.append({"package": label, "license": package.get("license"), "notice-files": paths})
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=dev.ROOT, text=True).strip()
     dirty = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=dev.ROOT, text=True).strip())
     if provenance.get("source-commit") != revision or provenance.get("source-dirty") or dirty:

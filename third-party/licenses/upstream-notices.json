@@ -1,0 +1,43 @@
+[
+  {
+    "file": "wasmi-mit.txt",
+    "source": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/LICENSE-MIT",
+    "git-blob": "1399b075915d94e530b1aa7de1938139d713ab31",
+    "sha256": "172bc1497507c1c363496bc23b0f16de8fa8e94befa85db6c8d9fa790e0a8657"
+  },
+  {
+    "file": "wasmi-apache.txt",
+    "source": "https://github.com/wasmi-labs/wasmi/blob/2970aa871cc1001b57b267ccecdcd1e42306199e/LICENSE-APACHE",
+    "git-blob": "b35f96d23531d1d9108fdbfe418eba812d3f3fb7",
+    "sha256": "f031c1608e4a19e8cbcc3394cdba838067e79189610227459e8ffcd669e6f52d"
+  },
+  {
+    "file": "wasm-tools-mit.txt",
+    "source": "https://github.com/bytecodealliance/wasm-tools/blob/e66235859a6ec0502bf6f9dcc358953eda4cafcc/LICENSE-MIT",
+    "git-blob": "31aa79387f27e730e33d871925e152e35e428031",
+    "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+  },
+  {
+    "file": "wasm-tools-apache.txt",
+    "source": "https://github.com/bytecodealliance/wasm-tools/blob/e66235859a6ec0502bf6f9dcc358953eda4cafcc/LICENSE-APACHE",
+    "git-blob": "16fe87b06e802f094b3fbb0894b137bca2b16ef1",
+    "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+  },
+  {
+    "file": "wasm-tools-llvm-exception.txt",
+    "source": "https://github.com/bytecodealliance/wasm-tools/blob/e66235859a6ec0502bf6f9dcc358953eda4cafcc/LICENSE-Apache-2.0_WITH_LLVM-exception",
+    "git-blob": "f9d81955f4bcb8f96a025e2ecc46f39ec536d465",
+    "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+  },
+  {
+    "file": "pic8259-readme.md",
+    "source": "https://github.com/rust-osdev/pic8259/blob/136052bcbf081b9382fc3d72ba04b83b30f664b4/README.md",
+    "license-choice": "Apache-2.0",
+    "sha256": "a1ae7c971139d5a638d1580455e0a5636fecd09703fe8f4018497f5007517d44"
+  },
+  {
+    "file": "apache-2.0.txt",
+    "source": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+  }
+]

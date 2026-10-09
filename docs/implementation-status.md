@@ -78,3 +78,9 @@ bounded to 120 seconds, one CPU, 256 MiB, and no NIC. Cargo uses two jobs.
 The original presentation/dashboard archive describes its earlier `44b739d`
 baseline. Use the current [professor brief](professor-brief.md) and
 [guest/cloud runbook](cloud-demo.md) for the integrated OS.
+
+The [recorded guest log](evidence/guest-demo.log),
+[reboot/rejection log](evidence/guest-reboot.log) and
+[capture manifest](evidence/manifest.json) preserve the successful native-Linux
+prebuilt-bundle run, with source and ISO identities. They are evidence, not a
+substitute for running the current acceptance command.
