@@ -1,0 +1,14 @@
+{
+  "tool": "Built-in image_gen",
+  "kind": "Conceptual illustrations, not screenshots or empirical evidence",
+  "assets": [
+    {
+      "path": "presentation/assets/cover-memory.png",
+      "prompt": "Create a restrained editorial concept illustration for the cover of an academic computer-systems research pitch named MnemosyneOS. Landscape 16:9 image. Uniform deep graphite near-black background (#101C24). Reserve the entire left 55 percent as clean dark negative space for separately editable white slide typography. In the right 45 percent, a close-up isometric sculptural arrangement of three thin precisely machined smoked-glass memory layers above a small brushed metal silicon core, with subtle warm copper and pale mint highlights. One offset translucent layer suggests a saved memory snapshot, with two very fine controlled light traces returning to the core to suggest replay. Crisp physical materials, restrained cinematic lighting, lots of empty space, engineering research editorial aesthetic. No text, no logos, no screen UI, no labels, no arrows, no padlock or shield icons, no brains, no people. This is conceptual artwork, not an actual photograph of hardware."
+    },
+    {
+      "path": "presentation/assets/replay-concept.png",
+      "prompt": "Editorial concept illustration for a university computer-systems presentation about deterministic checkpoint and replay. Landscape 3:2 image on warm ivory (#F5F2EA), with generous surrounding negative space. Two compact transparent smoked-glass stacks of thin memory sheets, one in the left third and one in the right third, with exactly matching tiny copper and teal patterns embedded in corresponding layers. Between them, a short ordered sequence of five small translucent glass tiles suggests a recorded sequence of inputs. The right stack is gently reassembling with a restrained mint light. Precise isometric perspective, realistic glass and metal materials, subtle soft shadows, clean technical editorial style, restrained premium scientific visualization. The entire arrangement stays in the central 80 percent. No text, numbers, diagrams with labels, axes, arrows, logos, people, shields, locks, circuit-board wallpaper, glowing neon, or UI. This is conceptual artwork for the memory restoration idea, not evidence or a literal execution trace."
+    }
+  ]
+}

@@ -48,7 +48,7 @@ Clock and random providers are controlled synthetic inputs. Effects are observat
 
 ## Presentation and demo
 
-The pitch deck and viewing PDF are in `presentation/output`. The [complete demo guide](presentation/demo-runbook.md) includes narration, exact commands, expected results, setup, and failure fallback.
+Open the [30-slide PowerPoint](presentation/output/MnemosyneOS-Pitch.pptx), [viewing PDF](presentation/output/MnemosyneOS-Pitch.pdf), or [speaker notes](presentation/output/MnemosyneOS-Speaker-Notes.md). The [complete demo guide](presentation/demo-runbook.md) includes narration, exact commands, expected results, setup, and failure fallback. [Presentation source and editing instructions](presentation/README.md) are included.
 
 ```sh
 python tools/present.py
