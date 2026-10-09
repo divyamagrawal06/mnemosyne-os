@@ -612,5 +612,117 @@ pub fn demo() -> Result<DemoReport> {
     Ok(report)
 }
 
+/// Durable serialization envelope for the fixed fixture. Filesystem integrity
+/// protects bytes at rest; neither these bytes nor an AI plan grant authority.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub struct RecoveryBundle {
+    checkpoint: Snapshot,
+    log: ReplayLog,
+    requests: Vec<Request>,
+    expected_state: String,
+    expected_effects: Vec<Effect>,
+}
+impl RecoveryBundle {
+    pub fn checkpoint_sha256(&self) -> String {
+        self.checkpoint.digest_hex()
+    }
+    pub fn event_count(&self) -> usize {
+        self.log.events.len()
+    }
+    pub fn request_count(&self) -> usize {
+        self.requests.len()
+    }
+    pub fn validate(&self) -> Result<()> {
+        self.checkpoint
+            .validate(Sha256::digest(WORKLOAD_BYTES).into())?;
+        self.log.validate(&self.checkpoint)
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct RecoveryReport {
+    pub passed: bool,
+    pub state_equal: bool,
+    pub effects_equal: bool,
+    pub requests: usize,
+    pub events: usize,
+    pub final_sha256: String,
+}
+
+pub fn capture_fault_demo() -> Result<RecoveryBundle> {
+    let mut live = Worker::record(42)?;
+    for key in 0..4 {
+        live.apply(Request {
+            key,
+            delta: i64::from(key) * 3,
+        })?;
+    }
+    let checkpoint = live.start_recording()?;
+    let requests: Vec<_> = (0..12)
+        .map(|index| Request {
+            key: index % 7,
+            delta: i64::from(index) - 5,
+        })
+        .collect();
+    for request in &requests {
+        live.apply(*request)?;
+    }
+    let bundle = RecoveryBundle {
+        checkpoint,
+        log: live.log()?,
+        requests,
+        expected_state: live.snapshot()?.digest_hex(),
+        expected_effects: live.observed_effects().to_vec(),
+    };
+    if live.apply(Request { key: 16, delta: 1 }).is_ok() || live.snapshot().is_ok() {
+        return Err(LabError::Contract(
+            "fault injection did not poison the worker",
+        ));
+    }
+    // Dropping the failed instance ensures no mutated interpreter state leaks
+    // into the subsequent reconstruction.
+    Ok(bundle)
+}
+
+pub fn recover_bundle(bundle: &RecoveryBundle) -> Result<RecoveryReport> {
+    recover_live(bundle).map(|(_, report)| report)
+}
+
+/// Publish only after complete replay and comparison. The caller can atomically
+/// replace its failed instance with this new worker and accept new live requests.
+pub fn recover_live(bundle: &RecoveryBundle) -> Result<(Worker, RecoveryReport)> {
+    if bundle.requests.len() > MAX_EVENTS / 5
+        || bundle.expected_effects.len() != bundle.requests.len()
+    {
+        return Err(LabError::Contract("recovery bundle bounds"));
+    }
+    let mut replay = replay_requests(&bundle.checkpoint, &bundle.log, &bundle.requests)?;
+    let final_sha256 = replay.snapshot()?.digest_hex();
+    let state_equal = final_sha256 == bundle.expected_state;
+    let effects_equal = replay.observed_effects() == bundle.expected_effects;
+    if !state_equal || !effects_equal {
+        return Err(LabError::Contract("recovered state or effects differ"));
+    }
+    let anchor = replay.snapshot()?.digest;
+    replay.store.data_mut().mode = Mode::Record {
+        anchor,
+        events: Vec::new(),
+    };
+    replay.store.data_mut().observed.clear();
+    Ok((
+        replay,
+        RecoveryReport {
+            passed: true,
+            state_equal,
+            effects_equal,
+            requests: bundle.requests.len(),
+            events: bundle.log.events.len(),
+            final_sha256,
+        },
+    ))
+}
+
 #[cfg(test)]
 mod tests;

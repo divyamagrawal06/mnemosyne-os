@@ -29,13 +29,22 @@ pub const INIT_HEAP_BYTES: usize = 24 * 1024 * 1024;
 pub const WORKER_HEAP_BYTES: usize = 64 * 1024;
 pub const STACK_TOP: u64 = 0x7000_0000;
 pub const STACK_BYTES: u64 = 512 * 1024;
+pub const INIT_STACK_BYTES: u64 = 4 * 1024 * 1024;
 
 #[derive(Debug, Clone, Copy, Default)]
 #[repr(C)]
-pub struct Message { pub sender: u64, pub value: u64, pub tag: u64 }
+pub struct Message {
+    pub sender: u64,
+    pub value: u64,
+    pub tag: u64,
+}
 #[derive(Debug, Clone, Copy, Default)]
 #[repr(C)]
 pub struct TaskInfo {
-    pub pid: u64, pub state: u64, pub switches: u64, pub preemptions: u64,
-    pub faults: u64, pub epoch: u64,
+    pub pid: u64,
+    pub state: u64,
+    pub switches: u64,
+    pub preemptions: u64,
+    pub faults: u64,
+    pub epoch: u64,
 }

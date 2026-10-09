@@ -3,11 +3,17 @@
 #![no_std]
 #![no_main]
 #![feature(abi_x86_interrupt)]
+extern crate alloc;
 
 mod arch;
+mod ata;
+mod heap;
 mod memory;
 mod paging;
 mod serial;
+mod tasks;
+#[path = "user-memory.rs"]
+mod user_memory;
 
 use limine::{
     BaseRevision,
@@ -33,6 +39,7 @@ static END: RequestsEndMarker = RequestsEndMarker::new();
 
 #[unsafe(no_mangle)]
 extern "C" fn kmain() -> ! {
+    heap::initialize();
     serialln!("{{\"event\":\"boot\",\"kernel\":\"mnemosyne\",\"abi\":1}}");
     assert!(BASE.is_supported(), "unsupported Limine base revision");
     let entries = MEMORY
@@ -80,8 +87,22 @@ extern "C" fn kmain() -> ! {
     let ticks = arch::timer_smoke();
     serialln!("{{\"event\":\"timer_ok\",\"ticks\":{ticks}}}");
     serialln!("{{\"event\":\"boot_ok\"}}");
+    if shell_mode() {
+        tasks::launch(offset, frames);
+    }
     exit_qemu(0x10)
 }
+
+fn shell_mode() -> bool {
+    EXECUTABLE
+        .get_response()
+        .is_some_and(|r| r.file().string().to_bytes() == b"shell")
+}
+
+#[used]
+#[unsafe(link_section = ".requests")]
+static EXECUTABLE: limine::request::ExecutableFileRequest =
+    limine::request::ExecutableFileRequest::new();
 
 fn capability_smoke() {
     use mnemosyne_capability::{Error, ObjectKind, Rights, Table};

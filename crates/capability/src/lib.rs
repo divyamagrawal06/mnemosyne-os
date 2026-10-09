@@ -27,6 +27,7 @@ pub enum ObjectKind {
     Memory,
     Endpoint,
     Process,
+    Device,
 }
 
 impl ObjectKind {
@@ -37,6 +38,7 @@ impl ObjectKind {
                 Self::Memory => Rights::READ | Rights::WRITE,
                 Self::Endpoint => Rights::SEND | Rights::RECEIVE,
                 Self::Process => Rights::CONTROL,
+                Self::Device => Rights::READ | Rights::WRITE | Rights::CONTROL,
             }
     }
 }

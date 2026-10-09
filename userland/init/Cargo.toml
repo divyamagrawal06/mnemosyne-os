@@ -1,0 +1,20 @@
+[package]
+name = "mnemosyne-user-init"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "mnemosyne-user-init"
+path = "src/main.rs"
+test = false
+bench = false
+
+[dependencies]
+mnemosyne-abi = { path = "../../crates/abi" }
+mnemosyne-chronicle-fs = { path = "../../crates/chronicle-fs" }
+mnemosyne-service-runtime = { path = "../../crates/service-runtime" }
+mnemosyne-recovery-policy = { path = "../../crates/recovery-policy" }
+linked_list_allocator = { version = "=0.10.6", default-features = false, features = ["use_spin"] }
+serde_json = { version = "=1.0.151", default-features = false, features = ["alloc"] }
+

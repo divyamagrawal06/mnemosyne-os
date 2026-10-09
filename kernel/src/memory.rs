@@ -12,6 +12,7 @@ pub struct BootFrames<'a> {
     entries: &'a [&'a Entry],
     region: usize,
     next: u64,
+    free: alloc::vec::Vec<u64>,
 }
 
 impl<'a> BootFrames<'a> {
@@ -23,10 +24,14 @@ impl<'a> BootFrames<'a> {
             entries,
             region: 0,
             next: 0,
+            free: alloc::vec::Vec::new(),
         }
     }
 
     pub fn allocate(&mut self) -> Option<u64> {
+        if let Some(frame) = self.free.pop() {
+            return Some(frame);
+        }
         while let Some(entry) = self.entries.get(self.region) {
             if entry.entry_type == EntryType::USABLE {
                 let start = entry.base.checked_add(PAGE_SIZE - 1)? & !(PAGE_SIZE - 1);
@@ -42,6 +47,13 @@ impl<'a> BootFrames<'a> {
             self.next = 0;
         }
         None
+    }
+
+    /// # Safety
+    /// The frame must have come from this allocator and have no remaining
+    /// mappings or checkpoint references. Each frame may be returned only once.
+    pub unsafe fn release(&mut self, frame: u64) {
+        self.free.push(frame);
     }
 }
 

@@ -9,4 +9,10 @@ fn main() {
         .join("linker-x86_64.ld");
     println!("cargo:rustc-link-arg=-T{}", script.display());
     println!("cargo:rerun-if-changed=linker-x86_64.ld");
+    let image = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+        .join("../build/user-init.elf")
+        .canonicalize()
+        .expect("build user-init first with tools/dev.py");
+    println!("cargo:rustc-env=MNEMOSYNE_USER_IMAGE={}", image.display());
+    println!("cargo:rerun-if-changed={}", image.display());
 }

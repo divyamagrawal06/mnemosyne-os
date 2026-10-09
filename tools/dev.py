@@ -6,6 +6,10 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import struct
+import queue
+import threading
+import time
 
 ROOT = Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
@@ -38,6 +42,27 @@ def cargo(*args):
 
 
 def build(release=False):
+    cargo("build", "--locked", "-p", "mnemosyne-user-init", "--target", TARGET,
+          *(["--release"] if release else []))
+    # Embed only ELF load segments, not host debug paths/section tables.
+    profile = "release" if release else "debug"
+    data = bytearray((ROOT / "target" / TARGET / profile / "mnemosyne-user-init").read_bytes())
+    phoff = struct.unpack_from("<Q", data, 32)[0]
+    size, count = struct.unpack_from("<HH", data, 54)
+    end = phoff + size * count
+    for i in range(count):
+        at = phoff + i * size
+        if struct.unpack_from("<I", data, at)[0] == 1:
+            offset = struct.unpack_from("<Q", data, at + 8)[0]
+            length = struct.unpack_from("<Q", data, at + 32)[0]
+            end = max(end, offset + length)
+    struct.pack_into("<Q", data, 40, 0)
+    struct.pack_into("<HHH", data, 58, 0, 0, 0)
+    BUILD.mkdir(parents=True, exist_ok=True)
+    packed = BUILD / "user-init.elf"
+    payload = data[:end]
+    if not packed.exists() or packed.read_bytes() != payload:
+        packed.write_bytes(payload)
     cargo("build", "--locked", "-p", "mnemosyne-kernel", "--target", TARGET,
           *(["--release"] if release else []))
 
@@ -53,10 +78,10 @@ def bootloader():
     run(linux_command(["make", "-C", linux_path(LIMINE), "-j2"]))
 
 
-def image(release=False):
+def image(release=False, shell=False):
     build(release)
     bootloader()
-    suffix = "-release" if release else ""
+    suffix = ("-os" if shell else "") + ("-release" if release else "")
     profile = "release" if release else "debug"
     stage = BUILD / ("iso-root" + suffix)
     boot = stage / "boot"
@@ -65,7 +90,10 @@ def image(release=False):
     for folder in (loader, efi):
         folder.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(ROOT / "target" / TARGET / profile / "mnemosyne-kernel", boot / "mnemosyne-kernel")
-    shutil.copyfile(ROOT / "boot" / "limine.conf", boot / "limine.conf")
+    config = (ROOT / "boot" / "limine.conf").read_text()
+    if shell:
+        config = config.replace("MnemosyneOS smoke test", "mnemosyne-os") + "    cmdline: shell\n"
+    (boot / "limine.conf").write_text(config)
     for name in ("limine-bios.sys", "limine-bios-cd.bin", "limine-uefi-cd.bin", "LICENSE"):
         shutil.copyfile(LIMINE / name, loader / name)
     shutil.copyfile(LIMINE / "BOOTX64.EFI", efi / "BOOTX64.EFI")
@@ -108,6 +136,111 @@ def check():
     cargo("clippy", "--locked", "--all-targets", "--", "-D", "warnings")
     cargo("clippy", "--locked", "-p", "mnemosyne-kernel", "--target", TARGET,
           "--", "-D", "warnings")
+    cargo("clippy", "--locked", "-p", "mnemosyne-user-init", "--target", TARGET,
+          "--", "-D", "warnings")
+
+
+def disk_image(path):
+    path = Path(path)
+    if not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("xb") as disk:
+            disk.truncate(16 * 1024 * 1024)
+    if path.stat().st_size != 16 * 1024 * 1024:
+        raise RuntimeError(f"Expected a dedicated 16-MiB disk image: {path}")
+    return path
+
+
+def guest_command(iso, disk, timeout=None):
+    args = ["qemu-system-x86_64", "-machine", "pc", "-accel", "tcg,thread=single",
+            "-cpu", "qemu64", "-m", "256M", "-smp", "1", "-cdrom", linux_path(iso),
+            "-drive", f"file={linux_path(disk)},format=raw,if=ide,index=0,cache=writethrough",
+            "-boot", "d", "-display", "none", "-serial", "stdio", "-monitor", "none",
+            "-nic", "none", "-no-reboot", "-no-shutdown",
+            "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04"]
+    if timeout:
+        args = ["timeout", "--signal=KILL", f"{timeout}s", *args]
+    return linux_command(args)
+
+
+def run_os(release=False):
+    iso = image(release, shell=True)
+    disk = disk_image(BUILD / "chronicle-disk.img")
+    print("Booting mnemosyne-os. Type help or shutdown. Disk:", disk, flush=True)
+    status = subprocess.call(guest_command(iso, disk), cwd=ROOT)
+    if status != 33:
+        raise RuntimeError(f"Guest exited with status {status}")
+
+
+def guest_session(iso, disk, commands, timeout=90):
+    command = guest_command(iso, disk, timeout)
+    process = subprocess.Popen(command, cwd=ROOT, stdin=subprocess.PIPE,
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    output = bytearray()
+    stream = queue.Queue()
+    def reader():
+        while True:
+            byte = process.stdout.read(1)
+            stream.put(byte)
+            if not byte:
+                break
+    thread = threading.Thread(target=reader, daemon=True)
+    thread.start()
+    deadline = time.monotonic() + timeout + 5
+    cursor = 0
+    def expect(prompt):
+        nonlocal cursor
+        while prompt not in output[cursor:]:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise RuntimeError("guest console timed out")
+            try:
+                byte = stream.get(timeout=min(remaining, 1))
+            except queue.Empty:
+                continue
+            if not byte:
+                raise RuntimeError("guest exited before expected prompt")
+            output.extend(byte)
+        cursor = len(output)
+    try:
+        for command in commands:
+            expect(b"mnemosyne-os> ")
+            process.stdin.write(command.encode("ascii") + b"\r")
+            process.stdin.flush()
+        process.stdin.close()
+        while True:
+            try:
+                byte = stream.get(timeout=max(.1, deadline - time.monotonic()))
+            except queue.Empty:
+                raise RuntimeError("guest shutdown timed out") from None
+            if not byte:
+                break
+            output.extend(byte)
+        status = process.wait(timeout=5)
+        if status != 33:
+            raise RuntimeError(f"guest failed with status {status}")
+    finally:
+        # The Linux timeout owns this exact QEMU process and enforces its lifetime.
+        (BUILD / "guest-last.log").write_bytes(output)
+        print(output.decode("utf-8", errors="replace"), end="", flush=True)
+    return output.decode("utf-8", errors="replace")
+
+
+def guest_test(release=False):
+    iso = image(release, shell=True)
+    disk = disk_image(BUILD / f"guest-test-{time.time_ns()}.img")
+    first = guest_session(iso, disk, ["demo", "ps", "write persistence-proof.txt survived-reboot", "shutdown"], timeout=120)
+    events = [json.loads(line) for line in first.splitlines() if line.startswith('{"event":')]
+    required = {"ipc-demo", "capability-demo", "fault-demo", "cow-replay", "filesystem-demo", "wasm-recovery", "guest-demo"}
+    passed = {e["event"] for e in events if e.get("passed") is True}
+    if not required <= passed or "error:" in first or "PANIC" in first or "user-panic" in first:
+        raise RuntimeError("Guest demonstration did not satisfy every acceptance gate")
+    (BUILD / "guest-demo.log").write_text(first, encoding="utf-8")
+    second = guest_session(iso, disk, ["cat persistence-proof.txt", "cat demo-note.txt", "recover", "kv-add 1 2", "shutdown"], timeout=120)
+    if "survived-reboot" not in second or "before-change" not in second or '"state-equal":true' not in second or "kv-service key=1 value=" not in second or "error:" in second:
+        raise RuntimeError("Guest reboot persistence or recovery failed")
+    (BUILD / "guest-reboot.log").write_text(second, encoding="utf-8")
+    print("Guest acceptance passed: ring-3 isolation, preemption, IPC, capabilities, COW, disk snapshots, Wasm recovery, and reboot persistence.")
 
 
 def demo():
@@ -125,10 +258,11 @@ def demo():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["build", "image", "boot", "test", "check", "demo"])
+    parser.add_argument("command", choices=["build", "image", "os-image", "run", "guest-test", "boot", "test", "check", "demo"])
     parser.add_argument("--release", action="store_true", help="optimized kernel build/image/boot")
     args = parser.parse_args()
-    kernel_commands = {"build": build, "image": image, "boot": smoke}
+    kernel_commands = {"build": build, "image": image, "boot": smoke, "run": run_os,
+                       "os-image": lambda release: image(release, shell=True), "guest-test": guest_test}
     if args.command in kernel_commands:
         kernel_commands[args.command](release=args.release)
     else:
