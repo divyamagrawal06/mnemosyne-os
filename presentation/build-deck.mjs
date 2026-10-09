@@ -33,7 +33,7 @@ const SOURCES = {
   rifl: 'Lee et al. Implementing Linearizability at Large Scale and Low Latency. SOSP 2015. https://web.stanford.edu/~ouster/cgi-bin/papers/rifl.pdf',
   crash: 'Mohan et al. Finding Crash-Consistency Bugs with Bounded Black-Box Crash Testing. OSDI 2018. https://www.usenix.org/conference/osdi18/presentation/mohan',
   llm: 'Gundawar, Valmeekam, Verma and Kambhampati. Robust Planning with Compound LLM Architectures: An LLM-Modulo Approach. arXiv:2411.14484, 2024. https://arxiv.org/html/2411.14484v1',
-  reuse: 'Repository: THIRD_PARTY.md and Cargo.lock. Upstream: https://github.com/limine-bootloader/limine and https://github.com/rust-osdev/x86_64 and https://github.com/wasmi-labs/wasmi. Copied template notice: third_party/licenses/limine-rust-template-0BSD.txt.',
+  reuse: 'Repository: THIRD_PARTY.md and Cargo.lock. Upstream: https://github.com/limine-bootloader/limine and https://github.com/rust-osdev/x86_64 and https://github.com/wasmi-labs/wasmi. Copied template notice: third-party/licenses/limine-rust-template-0BSD.txt.',
   demo: 'Repository: tools/present.py, tools/dev.py and presentation/demo-runbook.md. Rehearsal evidence and checksums: presentation/evidence/manifest.json.',
 };
 
@@ -305,7 +305,7 @@ for (const [i, spec] of slides.entries()) {
 
 if (presentation.slides.items.length !== 30) throw new Error('Unexpected slide count');
 await fs.writeFile(path.join(TMP, 'presentation.json'), JSON.stringify(presentation.toProto()));
-await fs.writeFile(path.join(OUT, 'MnemosyneOS-Speaker-Notes.md'), '# MnemosyneOS speaker notes\n\nSlides 1-22 are the main presentation. Slides 23-30 are technical backup. See the demo guide for the exact terminal walkthrough.\n\n' + allNotes.join('\n'));
+await fs.writeFile(path.join(OUT, 'mnemosyne-os-speaker-notes.md'), '# MnemosyneOS speaker notes\n\nSlides 1-22 are the main presentation. Slides 23-30 are technical backup. See the demo guide for the exact terminal walkthrough.\n\n' + allNotes.join('\n'));
 const candidatePath = path.join(TMP, 'candidate.pptx');
 await (await PresentationFile.exportPptx(presentation)).save(candidatePath);
 for (const [i, slide] of presentation.slides.items.entries()) {
@@ -317,7 +317,7 @@ for (const [i, slide] of presentation.slides.items.entries()) {
 }
 const result = await finalizePresentation({
   workspaceDir: ROOT, candidatePath,
-  finalPath: path.join(OUT, args.output || 'MnemosyneOS-Pitch.pptx'),
+  finalPath: path.join(OUT, args.output || 'mnemosyne-os-pitch.pptx'),
   pythonExecutable: args.python,
   integrityValidatorPath: path.join(args['skill-dir'], 'container_tools/inspect_presentation_package_integrity.py'),
   layoutValidatorPath: path.join(args['skill-dir'], 'container_tools/inspect_presentation_layout_geometry.py'),

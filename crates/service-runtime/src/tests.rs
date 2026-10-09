@@ -1,4 +1,34 @@
 use super::*;
+
+#[test]
+fn durable_bundle_roundtrip_recovers_then_accepts_live_requests() {
+    let bundle = capture_fault_demo().unwrap();
+    let bytes = serde_json::to_vec(&bundle).unwrap();
+    assert!(bytes.len() < 192 * 1024);
+    let decoded: RecoveryBundle = serde_json::from_slice(&bytes).unwrap();
+    decoded.validate().unwrap();
+    let (mut worker, report) = recover_live(&decoded).unwrap();
+    assert!(report.passed && report.state_equal && report.effects_equal);
+    assert_eq!(worker.apply(Request { key: 1, delta: 2 }).unwrap(), 180);
+    assert_eq!(worker.snapshot().unwrap().version, 17);
+}
+
+#[test]
+fn corrupt_durable_bundle_never_publishes_a_worker() {
+    let original = capture_fault_demo().unwrap();
+    for case in 0..4 {
+        let mut bundle = original.clone();
+        match case {
+            0 => bundle.checkpoint.memory[0] ^= 1,
+            1 => {
+                bundle.log.events.pop();
+            }
+            2 => bundle.expected_state = String::from("wrong-state"),
+            _ => bundle.expected_effects[0].value += 1,
+        }
+        assert!(recover_live(&bundle).is_err());
+    }
+}
 use alloc::vec;
 
 fn request(key: i32) -> Request {

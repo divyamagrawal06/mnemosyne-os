@@ -126,7 +126,7 @@ impl AddressSpace {
         space
     }
 
-    fn mapper<'a>(&mut self, offset: u64) -> OffsetPageTable<'a> {
+    fn mapper(&mut self, offset: u64) -> OffsetPageTable<'_> {
         unsafe {
             OffsetPageTable::new(
                 &mut *((offset + self.root) as *mut PageTable),

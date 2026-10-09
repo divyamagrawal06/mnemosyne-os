@@ -57,7 +57,9 @@ def parse_evidence(kind, output):
         cases, group = [], "Other"
         for line in output.splitlines():
             if "Running unittests" in line:
-                group = "Capabilities" if "mnemosyne_capability" in line else "Replay & runtime"
+                group = ("Capabilities" if "mnemosyne_capability" in line else
+                         "Filesystem" if "mnemosyne_chronicle_fs" in line else
+                         "Recovery policy" if "mnemosyne_recovery_policy" in line else "Replay & runtime")
             match = re.match(r"test (\S+) \.\.\. (ok|FAILED|ignored)\s*$", line)
             if match:
                 cases.append({"name": match[1].removeprefix("tests::"), "status": match[2], "group": group})
@@ -279,8 +281,8 @@ ASSETS = {"/": ("ui/index.html", "text/html; charset=utf-8"),
           "/app.js": ("ui/app.js", "text/javascript; charset=utf-8"),
           "/style.css": ("ui/style.css", "text/css; charset=utf-8"),
           "/favicon.svg": ("ui/favicon.svg", "image/svg+xml"),
-          "/files/pitch.pdf": ("presentation/output/MnemosyneOS-Pitch.pdf", "application/pdf"),
-          "/files/pitch.pptx": ("presentation/output/MnemosyneOS-Pitch.pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"),
+          "/files/pitch.pdf": ("presentation/output/mnemosyne-os-pitch.pdf", "application/pdf"),
+          "/files/pitch.pptx": ("presentation/output/mnemosyne-os-pitch.pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"),
           "/files/guide.md": ("presentation/demo-runbook.md", "text/plain; charset=utf-8")}
 
 

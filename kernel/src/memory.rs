@@ -6,8 +6,8 @@ use x86_64::{
 
 pub const PAGE_SIZE: u64 = 4096;
 
-/// Boot-only frame allocator. Never reuses frames or touches reserved regions.
-/// Replaced by a reclaiming allocator before dynamic process teardown is added.
+/// Allocates only usable RAM. Reuses explicitly released private COW frames;
+/// page-table and boot-test frames remain owned for the lifetime of this boot.
 pub struct BootFrames<'a> {
     entries: &'a [&'a Entry],
     region: usize,
@@ -58,7 +58,7 @@ impl<'a> BootFrames<'a> {
 }
 
 // SAFETY: construction requires unique ownership of disjoint usable regions;
-// allocation advances monotonically within each region and never reuses a frame.
+// fresh allocation advances monotonically; released frames require unique ownership.
 unsafe impl FrameAllocator<Size4KiB> for BootFrames<'_> {
     fn allocate_frame(&mut self) -> Option<PhysFrame<Size4KiB>> {
         self.allocate().map(|address| {

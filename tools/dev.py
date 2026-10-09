@@ -229,15 +229,27 @@ def guest_session(iso, disk, commands, timeout=90):
 def guest_test(release=False):
     iso = image(release, shell=True)
     disk = disk_image(BUILD / f"guest-test-{time.time_ns()}.img")
-    first = guest_session(iso, disk, ["demo", "ps", "write persistence-proof.txt survived-reboot", "shutdown"], timeout=120)
+    guest_acceptance(iso, disk)
+
+
+def guest_acceptance(iso, disk):
+    first = guest_session(iso, disk, ["demo", "ps", "plan-show", "write persistence-proof.txt survived-reboot", "shutdown"], timeout=120)
     events = [json.loads(line) for line in first.splitlines() if line.startswith('{"event":')]
     required = {"ipc-demo", "capability-demo", "fault-demo", "cow-replay", "filesystem-demo", "wasm-recovery", "guest-demo"}
     passed = {e["event"] for e in events if e.get("passed") is True}
     if not required <= passed or "error:" in first or "PANIC" in first or "user-panic" in first:
         raise RuntimeError("Guest demonstration did not satisfy every acceptance gate")
     (BUILD / "guest-demo.log").write_text(first, encoding="utf-8")
-    second = guest_session(iso, disk, ["cat persistence-proof.txt", "cat demo-note.txt", "recover", "kv-add 1 2", "shutdown"], timeout=120)
-    if "survived-reboot" not in second or "before-change" not in second or '"state-equal":true' not in second or "kv-service key=1 value=" not in second or "error:" in second:
+    plan = next(json.loads(line) for line in first.splitlines() if line.startswith('{"version":1,"action":'))
+    (BUILD / "recovery-context.json").write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")
+    bad_plan = {**plan, "requested-rights": 255}
+    bad_command = "write rejected-plan.json " + json.dumps(bad_plan, separators=(",", ":"))
+    second = guest_session(iso, disk, ["cat persistence-proof.txt", "cat demo-note.txt", bad_command,
+                           "verify-plan rejected-plan.json", "recover", "kv-add 1 2", "shutdown"], timeout=120)
+    expected_rejection = "error: plan rejected: PrivilegeAmplification"
+    if ("survived-reboot" not in second or "before-change" not in second or '"state-equal":true' not in second
+            or "kv-service key=1 value=" not in second or expected_rejection not in second
+            or "error:" in second.replace(expected_rejection, "")):
         raise RuntimeError("Guest reboot persistence or recovery failed")
     (BUILD / "guest-reboot.log").write_text(second, encoding="utf-8")
     print("Guest acceptance passed: ring-3 isolation, preemption, IPC, capabilities, COW, disk snapshots, Wasm recovery, and reboot persistence.")

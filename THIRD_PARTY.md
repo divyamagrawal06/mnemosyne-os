@@ -6,7 +6,7 @@ MnemosyneOS reuses upstream implementations through Cargo where possible. `Cargo
 
 | Origin | Pinned revision | Local use | License and changes |
 | --- | --- | --- | --- |
-| [Limine Rust template](https://github.com/jasondyoungberg/limine-rust-template/tree/ce82375f39a8e8ae85fbee1d1b147290cd6670c8) | `ce82375f39a8e8ae85fbee1d1b147290cd6670c8` | `kernel/linker-x86_64.ld`, boot request layout in `kernel/src/main.rs`, `kernel/build.rs` | 0BSD. Linker script copied; boot example adapted to serial/memory diagnostics; build script uses an absolute path and checks the target. Notice retained in `third_party/licenses/limine-rust-template-0BSD.txt`. |
+| [Limine Rust template](https://github.com/jasondyoungberg/limine-rust-template/tree/ce82375f39a8e8ae85fbee1d1b147290cd6670c8) | `ce82375f39a8e8ae85fbee1d1b147290cd6670c8` | `kernel/linker-x86_64.ld`, boot request layout in `kernel/src/main.rs`, `kernel/build.rs` | 0BSD. Linker script copied; boot example adapted to serial/memory diagnostics; build script uses an absolute path and checks the target. Notice retained in `third-party/licenses/limine-rust-template-0BSD.txt`. |
 | [Limine binary distribution](https://github.com/limine-bootloader/limine/tree/7a9013f305de0bea1f6310e76e7baba30499fef0) | `v10.8.5-binary`, commit `7a9013f305de0bea1f6310e76e7baba30499fef0` | Downloaded to `.tools/limine`; BIOS/UEFI boot files included in the generated ISO | BSD-2-Clause. Unmodified boot files; installer compiled from upstream `limine.c`. License retained locally and included in the ISO. |
 
 The ignored `.tools` directory is a build cache. The runner verifies the bootloader commit before image construction. No downloaded template build script is executed; the project runner builds the selected Limine installer target.
@@ -32,3 +32,19 @@ The source research cache is not incorporated into the implementation. Research 
 The Wasmi embedding uses upstream APIs without a fork or copied interpreter. Validation, portable dispatch, deterministic execution, fuel, and extra checks are enabled explicitly. The test workload and replay protocol are original code. Cargo dependencies include their upstream license files in the registry packages; retain those notices if distributing the packages or binaries.
 
 QEMU, xorriso, Git, the Rust toolchain, and the C compiler are external development tools. Their code is not compiled into the kernel. The first tested boot path uses QEMU's BIOS/SeaBIOS; the ISO also contains Limine's UEFI files, but that alone does not establish a tested UEFI boot.
+
+## Guest integration dependencies
+
+The pinned `linked_list_allocator` 0.10.6 from
+[rust-osdev/linked-list-allocator](https://github.com/rust-osdev/linked-list-allocator)
+is reused unchanged for kernel and private userspace heaps (MIT OR Apache-2.0).
+Wasmi 2.0.0 now runs in both the host lab and guest init through the shared
+`crates/service-runtime` crate, using `no_std`, software math and B-tree collections.
+SHA-256 uses `force-soft` because the freestanding CPU ABI excludes SIMD context.
+The WAT fixture is compiled at build time with the same pinned `wat` version.
+
+The kernel scheduler/trap ABI, ATA integration, ChronicleFS protocol, COW integration,
+policy verifier and guest shell are original project code. ELF page mapping reuses
+the upstream `x86_64` crate; the allocator and Wasmi engine are not forked.
+`tools/package-demo.py` includes registry dependency license/notice files and
+records declared license expressions in the bundle manifest.

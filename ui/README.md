@@ -1,5 +1,7 @@
 # MnemosyneOS local dashboard
 
+Current integrated OS demo: [cloud and guest runbook](../docs/cloud-demo.md). The original deck and saved browser evidence retain their earlier baseline.
+
 From the repository root:
 
 ```powershell
@@ -55,7 +57,7 @@ The Rust experiment exports the real `Vec<Event>` after recording. The frontend 
 ## Development checks
 
 ```powershell
-python -m unittest discover -s tools -p test_dashboard.py -v
+python tools/test-dashboard.py -v
 python tools/dev.py test
 python tools/dev.py check
 node --check ui/app.js

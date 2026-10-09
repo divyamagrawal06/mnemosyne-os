@@ -14,4 +14,5 @@ wat = { version = "=1.228.0", default-features = false }
 
 [dev-dependencies]
 wat = { version = "=1.228.0", default-features = false }
+serde_json = "=1.0.151"
 

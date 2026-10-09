@@ -1,5 +1,7 @@
 # MnemosyneOS presentation and demo guide
 
+Current integrated OS demo: [cloud and guest runbook](../docs/cloud-demo.md). The original deck and saved browser evidence retain their earlier baseline.
+
 The current demo can use the local browser dashboard or PowerShell, a headless QEMU guest, and a host Wasmi experiment. It shows working code and real correctness checks. The kernel has no graphical desktop or interactive shell yet. Statistical benchmark tooling, ChronicleFS, isolated userspace services, and the AI recovery verifier are future milestones.
 
 ## Browser demo route

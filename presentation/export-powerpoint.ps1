@@ -1,6 +1,6 @@
 param(
-    [string]$InputPath = (Join-Path $PSScriptRoot 'output\MnemosyneOS-Pitch.pptx'),
-    [string]$PdfPath = (Join-Path $PSScriptRoot 'output\MnemosyneOS-Pitch.pdf'),
+    [string]$InputPath = (Join-Path $PSScriptRoot 'output\mnemosyne-os-pitch.pptx'),
+    [string]$PdfPath = (Join-Path $PSScriptRoot 'output\mnemosyne-os-pitch.pdf'),
     [string]$PreviewDirectory = (Join-Path $PSScriptRoot '..\build\pitch\powerpoint')
 )
 

@@ -6,6 +6,7 @@ struct Disk {
     pending: BTreeMap<u64, [u8; 512]>,
     fail_at: Option<usize>,
     operations: usize,
+    fail_after_flush: bool,
 }
 impl Disk {
     fn new() -> Self {
@@ -14,6 +15,7 @@ impl Disk {
             pending: BTreeMap::new(),
             fail_at: None,
             operations: 0,
+            fail_after_flush: false,
         }
     }
     fn operation(&mut self) -> Result<()> {
@@ -29,6 +31,7 @@ impl Disk {
         self.pending.clear();
         self.fail_at = None;
         self.operations = 0;
+        self.fail_after_flush = false;
         self
     }
 }
@@ -48,10 +51,28 @@ impl BlockDevice for Disk {
         Ok(())
     }
     fn flush(&mut self) -> Result<()> {
+        if self.fail_after_flush && self.fail_at == Some(self.operations) {
+            self.sectors.append(&mut self.pending);
+        }
         self.operation()?;
         self.sectors.append(&mut self.pending);
         Ok(())
     }
+}
+
+#[test]
+fn ambiguous_final_flush_requires_remount_and_accepts_complete_new_root() {
+    let mut fs = initial();
+    fs.write("value", b"old").unwrap();
+    let mut disk = fs.into_device();
+    disk.operations = 0;
+    disk.fail_at = Some(3); // payload, first flush, header, final flush
+    disk.fail_after_flush = true;
+    let mut fs = FileSystem::mount(disk).unwrap();
+    assert_eq!(fs.write("value", b"new"), Err(Error::Io));
+    assert_eq!(fs.read("value"), Err(Error::Io));
+    let fs = FileSystem::mount(fs.into_device().crash()).unwrap();
+    assert_eq!(fs.read("value").unwrap(), b"new");
 }
 fn initial() -> FileSystem<Disk> {
     FileSystem::create_blank(Disk::new()).unwrap()

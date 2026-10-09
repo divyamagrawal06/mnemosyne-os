@@ -1,84 +1,110 @@
-# MnemosyneOS
+# mnemosyne-os
 
-A research Rust microkernel investigating capability isolation, deterministic service replay, and policy-checked recovery.
+A bootable Rust research OS for capability-controlled services, deterministic
+replay and policy-checked recovery. It has its own kernel and interactive serial
+console. Run it inside QEMU locally or on a non-Azure Linux cloud VM.
 
-The x86-64 kernel boots through Limine in QEMU and checks serial output, usable physical frames, page mapping, capability attenuation/revocation, breakpoint handling, and PIT timer interrupts. Hardware fault probes verify NX execution protection, supervisor write protection, and access after unmapping. The allocation-free capability library also has host tests for stale handles, subtree revocation, rights, capacity, object teardown, and generation exhaustion. This is a tested table implementation; a process/syscall security boundary is still pending.
+**Working now:** ring-3 tasks with private page tables, preemptive scheduling,
+checked syscalls, capability IPC, fault containment, native service copy-on-write
+checkpoints, a persistent snapshotting filesystem, guest Wasm replay, and a
+deterministic recovery-plan verifier.
 
-The host replay lab embeds Wasmi and exercises a fixed integer KV workload. It records requests, clock/random inputs, effects, and replies; restores memory and a mutable global into a fresh instance; and checks replay against the log. It tests corrupted snapshots, altered traces, fuel exhaustion, memory limits, and traps. This experiment runs on the host, separately from the kernel.
+The prototype uses one CPU, four compiled-in native tasks and one admitted Wasm
+fixture. It is not a desktop OS or a formally verified kernel. See the
+[implementation status](docs/implementation-status.md),
+[professor brief](docs/professor-brief.md), and [full demo path](docs/cloud-demo.md).
 
-The research proposal describes the intended system; it is not a claim that all features are implemented. Userspace, process scheduling, IPC, persistent storage, and recovery inside the OS are subsequent milestones. See [implementation status](docs/implementation-status.md) for the next acceptance gates.
+## Run the OS
 
-## Build and boot
+With the prebuilt demo bundle, only Python 3 and QEMU are required:
 
-Install Rust/rustup, Python 3, and Git on the build host. The pinned Rust toolchain and `x86_64-unknown-none` target are declared in `rust-toolchain.toml`.
+```sh
+python3 tools/run-image.py
+```
 
-The image tools and QEMU run on Linux, or in the existing Ubuntu WSL distribution on Windows:
+At the guest prompt:
+
+```text
+help
+ps
+demo
+ls
+snapshots
+shutdown
+```
+
+`demo` runs scheduling/IPC, capability rejection, CPU fault containment, COW
+checkpoint/replay, filesystem restore, and durable Wasm recovery **inside the
+guest OS**. Files persist in `build/chronicle-disk.img` across boots.
+
+## Build from source
+
+Install Git, Python 3 and rustup. `rust-toolchain.toml` pins Rust and the target.
+On Ubuntu, install the external image/emulator tools:
 
 ```sh
 sudo apt-get update
 sudo apt-get install --no-install-recommends build-essential qemu-system-x86 xorriso
+python3 tools/dev.py guest-test --release
+python3 tools/dev.py run --release
 ```
 
-From the repository root:
+On Windows use native Rust/Python and Ubuntu WSL for QEMU/xorriso; invoke `python`
+instead of `python3`. `MNEMOSYNE_WSL_DISTRO` selects a configured distribution.
+The runner fetches pinned Limine boot files and builds its installer. The guest
+needs no Linux kernel, network connection, browser, or AI model.
 
-```sh
-python tools/dev.py build
-python tools/dev.py boot
-python tools/dev.py boot --release
-python tools/dev.py test
-python tools/dev.py check
-python tools/dev.py demo
+| Command | Result |
+| --- | --- |
+| `python tools/dev.py build` | Userspace ELF and freestanding kernel |
+| `python tools/dev.py os-image --release` | `build/mnemosyne-os-release.iso` |
+| `python tools/dev.py run --release` | Interactive guest with persistent disk |
+| `python tools/dev.py guest-test --release` | Six-part demo plus reboot/recovery tests |
+| `python tools/dev.py boot` | Short kernel hardware checks, then exit |
+| `python tools/dev.py test` | Shared Rust correctness/failure tests |
+| `python tools/dev.py check` | Formatting and host/kernel/userspace Clippy |
+| `python tools/dev.py demo` | Original host-only Wasmi experiment |
+| `python tools/package-demo.py` | Prebuilt cloud-demo archive and licenses |
+
+## Architecture
+
+```text
+QEMU hardware: one x86-64 CPU, serial port, dedicated IDE disk
+  Rust kernel: page tables, interrupts, scheduler, capabilities, IPC, drivers
+    ring 3: init-console + ChronicleFS + Wasmi + recovery verifier
+    ring 3: counter-service  [native COW/IPC replay]
+    ring 3: cpu-hog          [non-yielding preemption probe]
+    ring 3: fault-service    [CPU fault containment probe]
 ```
 
-`boot` builds the kernel and an ISO, runs a headless 1-vCPU/256-MiB QEMU instance, verifies serial events and the exit status, and terminates the test VM. A timeout fails the test. Output is retained in `build/boot.log`; the image is `build/mnemosyne.iso`. Windows builds use native Cargo and WSL only for image construction and emulation. Set `MNEMOSYNE_WSL_DISTRO` to select another configured distribution.
+The privileged init process currently co-locates several services. The
+[status document](docs/implementation-status.md) explains this boundary and
+remaining decomposition work. Neither full-copy Wasm checkpoints nor native COW
+snapshots imply exactly-once external effects.
 
-`boot --release` exercises the same checks with optimized code and retains `build/boot-release.log` and `build/mnemosyne-release.iso`. The prototype requires four-level x86-64 paging and NX support. Fault fixups recognize only the reserved smoke-test instructions, address, and expected fault flags; unexpected kernel faults remain fatal.
+## Optional AI and browser tools
 
-The runner downloads a pinned Limine binary distribution into `.tools/limine` on first use. See [third-party attribution](THIRD_PARTY.md). BIOS boot is tested; UEFI files are included but UEFI boot is not yet tested.
+`tools/ai-plan.py` requests an untrusted typed plan from OpenAI or accepts an
+offline candidate. It never executes commands. The guest verifies the plan before
+recovery. Online mode requires the user's API key and explicit model; see
+[the AI walkthrough](docs/cloud-demo.md#optional-ai-proposal).
 
-`test`, `check`, and `demo` use native Cargo on Windows and require no VM. `demo` writes `build/replay-demo.json`. Host tests are the workspace default; `cargo test --workspace` would incorrectly include the freestanding kernel on a host target. The runner selects the kernel target explicitly for its build and lint checks.
+`python tools/dashboard.py --open` launches the older host evidence dashboard.
+It runs hardware smoke tests and the host replay experiment, separately from
+the guest shell. See the [UI guide](ui/README.md).
 
-## Replay experiment contract
+## Presentation and research
 
-The bundled workload has one 64-KiB memory and one mutable `i64` global, no tables, no threads, no floating point, and no start function. Wasmi validates it, meters each request with 10,000 fuel, and restricts memory to one page. A checkpoint copies all state in this fixture's schema between completed handlers. It is not a copy-on-write or mid-execution checkpoint.
+- [Professor brief](docs/professor-brief.md) and [cloud demo runbook](docs/cloud-demo.md)
+- [Original PowerPoint](presentation/output/mnemosyne-os-pitch.pptx),
+  [PDF](presentation/output/mnemosyne-os-pitch.pdf), and
+  [speaker notes](presentation/output/mnemosyne-os-speaker-notes.md)
+- [Literature review](docs/deep-research.md), [research plan](docs/research-plan.md),
+  [repository source guide](docs/source-reading-guide.md)
+- [Third-party versions and licenses](THIRD_PARTY.md)
 
-The bounded typed log is bound to the checkpoint digest, module hash, and execution profile. Replay injects recorded inputs and compares request arguments, effect payloads, and replies. Any trap or mismatch poisons the instance. Recovery constructs a fresh instance; it never continues with partially mutated state. An unread trace suffix also fails completion.
+The original deck preserves its proposal-stage `44b739d` baseline. Current
+capabilities are described in the brief and runbook. New paths and commands use
+kebab-case; language identifiers and conventional filenames retain their forms.
 
-Clock and random providers are controlled synthetic inputs. Effects are observations held in memory; there is no network or filesystem delivery. The lab does not yet establish durable commits, crash consistency, exactly-once delivery, authenticated logs, general Wasm snapshotting, or replay across runtime upgrades. The snapshot checksum detects corruption; it does not establish that a checkpoint is semantically safe or authorize a recovery action.
-
-## Presentation and demo
-
-Open the [30-slide PowerPoint](presentation/output/MnemosyneOS-Pitch.pptx), [viewing PDF](presentation/output/MnemosyneOS-Pitch.pdf), or [speaker notes](presentation/output/MnemosyneOS-Speaker-Notes.md). The [complete demo guide](presentation/demo-runbook.md) includes narration, exact commands, expected results, setup, and failure fallback. [Presentation source and editing instructions](presentation/README.md) are included.
-
-Launch the local browser dashboard:
-
-```sh
-python tools/dashboard.py --open
-```
-
-It serves [http://127.0.0.1:8765](http://127.0.0.1:8765) and provides live demo controls, kernel events, test filtering, state comparisons, the actual replay trace, raw logs, and evidence export. It uses Python's standard library and browser APIs; no npm install is needed. See the [UI guide](ui/README.md) for the presentation route and runner boundaries.
-
-The CLI route remains available:
-
-```sh
-python tools/present.py
-```
-
-The guided CLI runs kernel boot, host tests, and the Wasmi replay experiment with a pause before each step. Use `--auto` for rehearsal, `--host-only` to skip QEMU, or `--recorded` to show explicitly labeled saved evidence. The dashboard is a host demonstration UI, not a guest desktop. Statistical benchmark tooling and the remaining OS services are future work. The original pitch deck preserves its explicitly stated `44b739d` baseline; the dashboard is a subsequent increment.
-
-## Research sources
-
-- [Architecture and implementation plan](docs/research-plan.md)
-- [Deep literature and protocol review](docs/deep-research.md)
-- [Pinned repository reading guide](docs/source-reading-guide.md)
-- [Research collection notes](research/README.md)
-
-## Development principles
-
-Use existing bootloader, CPU support, Wasm, serialization, and testing libraries where practical. Keep original integration and recovery semantics small and testable. Record third-party attribution and pin dependency versions.
-
-The intended development VM is a short-lived local QEMU instance with one virtual CPU and 256 MiB RAM. It boots a disposable image; no cloud account is required. Full performance campaigns and model training are outside ordinary local development.
-
-Original project code is MIT licensed. Third-party dependencies retain their own licenses.
-
-Capability revocation currently traverses a fixed-capacity table synchronously in O(N²). Deleting a capability also deletes its descendants. Object teardown must invalidate references in every table before an object ID is reused. These are explicit prototype contracts, not a completed formal security proof.
+Original code is MIT licensed. Reused dependencies retain their own licenses.
