@@ -140,4 +140,9 @@ select { padding-right: 25px; }
   .data-table .test-name { min-width: 190px; }
   .test-table th:nth-child(2), .test-table td:nth-child(2), .test-name .mono { display: none; }
   .test-name .test-group-inline { display: block; }
+  .test-table { table-layout: fixed; }
+  .test-table th:first-child { width: 71%; }
+  .test-table th:last-child { width: 29%; }
+  .test-table .test-name { min-width: 0; }
+  .test-table td:last-child { min-width: 0; padding-left: 8px; padding-right: 8px; }
 }
