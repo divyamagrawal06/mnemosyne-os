@@ -278,6 +278,27 @@ fn memory_limit_rejects_growth_without_changing_size() {
 #[test]
 fn demo_checks_all_claimed_properties() {
     let report = demo().unwrap();
+    assert_eq!(report.trace.len(), report.trace_events);
+    let emitted: Vec<_> = report
+        .trace
+        .iter()
+        .filter_map(|event| match event {
+            Event::Emit { effect } => Some(*effect),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(emitted.len(), report.replayed_requests);
+    for (index, sequence) in report.trace.chunks_exact(5).enumerate() {
+        assert!(
+            matches!(sequence[0], Event::Request { request } if request.key == (index % 7) as i32 && request.delta == index as i64 - 5)
+        );
+        assert!(matches!(sequence[1], Event::Clock { .. }));
+        assert!(
+            matches!(sequence[2], Event::Random { bound, value } if bound > 0 && value >= 0 && value < i64::from(bound))
+        );
+        assert!(matches!(sequence[3], Event::Emit { .. }));
+        assert!(matches!(sequence[4], Event::Reply { value } if value == emitted[index].value));
+    }
     assert!(report.passed);
     assert_eq!(report.replayed_requests, 12);
     assert_eq!(report.trace_events, 60);

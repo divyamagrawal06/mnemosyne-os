@@ -544,6 +544,9 @@ pub struct DemoReport {
     reordered_event_rejected: bool,
     trailing_event_rejected: bool,
     corrupted_checkpoint_rejected: bool,
+    /// Actual observed input/output sequence, exported for the host inspector.
+    /// This does not change the checkpoint or replay acceptance contract.
+    trace: Vec<Event>,
 }
 
 pub fn demo() -> Result<DemoReport> {
@@ -595,6 +598,7 @@ pub fn demo() -> Result<DemoReport> {
         reordered_event_rejected: replay_requests(&checkpoint, &reordered, &requests).is_err(),
         trailing_event_rejected: replay_requests(&checkpoint, &trailing, &requests).is_err(),
         corrupted_checkpoint_rejected: Worker::replay(&corrupted, &log, 0).is_err(),
+        trace: log.events.clone(),
     };
     report.passed = report.state_equal
         && report.effects_equal
