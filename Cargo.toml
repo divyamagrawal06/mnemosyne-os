@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
-members = ["kernel", "crates/capability", "host/replay-lab"]
-default-members = ["crates/capability", "host/replay-lab"]
+members = ["kernel", "crates/capability", "host/replay-lab", "crates/service-runtime", "crates/chronicle-fs", "crates/recovery-policy", "crates/abi"]
+default-members = ["crates/capability", "host/replay-lab", "crates/service-runtime", "crates/chronicle-fs", "crates/recovery-policy", "crates/abi"]
 
 [workspace.package]
 version = "0.1.0"

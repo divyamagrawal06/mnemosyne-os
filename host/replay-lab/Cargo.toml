@@ -5,8 +5,5 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
-wasmi = { version = "=2.0.0", default-features = false, features = ["stable", "std", "validate", "deterministic", "portable-dispatch", "extra-checks"] }
-wat = { version = "=1.228.0", default-features = false }
-sha2 = "=0.10.9"
-serde = { version = "=1.0.228", features = ["derive"] }
+mnemosyne-service-runtime = { path = "../../crates/service-runtime" }
 serde_json = "=1.0.151"

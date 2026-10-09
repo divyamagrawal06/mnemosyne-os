@@ -1,0 +1,10 @@
+[package]
+name = "mnemosyne-recovery-policy"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { version = "=1.0.228", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "=1.0.151", default-features = false, features = ["alloc"] }
+
