@@ -1,5 +1,9 @@
 # Professor brief
 
+For the department's Review I rubric, use the [review guide](review-one-guide.md)
+for literature, architecture, algorithms, suggested module ownership and the
+live demo. It also identifies the unconfirmed completion percentage and team names.
+
 ## Thirty-second explanation
 
 “MnemosyneOS is a small research operating system written in Rust. Its kernel
