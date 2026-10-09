@@ -1,0 +1,55 @@
++ cargo test --locked
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.96s
+     Running unittests src\lib.rs (target\debug\deps\mnemosyne_capability-2b2427522688dacf.exe)
+
+running 8 tests
+test tests::capacity_failure_does_not_change_existing_authority ... ok
+test tests::delegation_attenuates_and_rejects_amplification ... ok
+test tests::exhausted_generation_retires_the_slot ... ok
+test tests::deletion_removes_descendants_and_stale_handles_never_alias_reuse ... ok
+test tests::object_teardown_invalidates_independent_roots ... ok
+test tests::forged_handle_wrong_type_and_unknown_rights_are_rejected ... ok
+test tests::subtree_revocation_preserves_parent_and_sibling ... ok
+test tests::exhaustive_rights_subsets_never_amplify ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\debug\deps\mnemosyne_replay_lab-f2b3c82cc83ae918.exe)
+
+running 16 tests
+test tests::profile_rejects_floating_point_start_functions_and_shared_memory ... ok
+test tests::memory_limit_rejects_growth_without_changing_size ... ok
+test tests::wasm_trap_after_emit_discards_pending_effect_and_mutated_state ... ok
+test tests::infinite_loop_terminates_with_fuel_trap ... ok
+test tests::reply_mismatch_does_not_publish_a_staged_effect ... ok
+test tests::fuel_exhaustion_poisons_worker ... ok
+test tests::empty_segment_restores_exactly ... ok
+test tests::trap_poisons_worker_and_requires_restore ... ok
+test tests::restores_memory_and_mutable_global_into_a_fresh_instance ... ok
+test tests::validates_random_arguments_and_return_range ... ok
+test tests::rejects_changed_requests_results_and_effects ... ok
+test tests::validates_checkpoint_schema_module_profile_size_and_checksum ... ok
+test tests::binds_trace_to_checkpoint_and_profile ... ok
+test tests::demo_checks_all_claimed_properties ... ok
+test tests::caps_trace_and_effect_growth ... ok
+test tests::rejects_missing_reordered_and_extra_events ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+     Running unittests src\main.rs (target\debug\deps\mnemosyne_replay_lab-9a28f7dc8ecb37bf.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests mnemosyne_capability
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests mnemosyne_replay_lab
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

@@ -46,7 +46,17 @@ The bounded typed log is bound to the checkpoint digest, module hash, and execut
 
 Clock and random providers are controlled synthetic inputs. Effects are observations held in memory; there is no network or filesystem delivery. The lab does not yet establish durable commits, crash consistency, exactly-once delivery, authenticated logs, general Wasm snapshotting, or replay across runtime upgrades. The snapshot checksum detects corruption; it does not establish that a checkpoint is semantically safe or authorize a recovery action.
 
-## Research
+## Presentation and demo
+
+The pitch deck and viewing PDF are in `presentation/output`. The [complete demo guide](presentation/demo-runbook.md) includes narration, exact commands, expected results, setup, and failure fallback.
+
+```sh
+python tools/present.py
+```
+
+The guided CLI runs kernel boot, host tests, and the Wasmi replay experiment with a pause before each step. Use `--auto` for rehearsal, `--host-only` to skip QEMU, or `--recorded` to show explicitly labeled saved evidence. The present interface is a CLI and serial output; a graphical OS interface and benchmark dashboard are future work.
+
+## Research sources
 
 - [Architecture and implementation plan](docs/research-plan.md)
 - [Deep literature and protocol review](docs/deep-research.md)

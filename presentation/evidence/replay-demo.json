@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "profile": "mnemosyne/kv-v1/wasmi-2.0.0/integer/fixed64k/fuel10000/portable",
+  "scope": "host Wasmi fixture; synthetic inputs and in-memory effects; no durable commit",
+  "replayed_requests": 12,
+  "trace_events": 60,
+  "snapshot_mutable_state_bytes": 65544,
+  "module_sha256": "957babae7802f5a03d66b3ac9fd94297ec5650b8c5aee62378ae6522801d46c6",
+  "checkpoint_sha256": "199be84bfeb8ac4fb383fbac7a9c46f5795a2768843673d5346b5b814d754a3d",
+  "final_state_sha256": "30097fe2565ba3716a1aa8c0699c8614caa27b9ca0edcc493a4d60b790a2da11",
+  "replay_state_sha256": "30097fe2565ba3716a1aa8c0699c8614caa27b9ca0edcc493a4d60b790a2da11",
+  "state_equal": true,
+  "effects_equal": true,
+  "missing_event_rejected": true,
+  "reordered_event_rejected": true,
+  "trailing_event_rejected": true,
+  "corrupted_checkpoint_rejected": true
+}

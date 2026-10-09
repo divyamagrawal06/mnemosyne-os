@@ -1,0 +1,9 @@
+limine: Loading executable `boot():/boot/mnemosyne-kernel`...
+{"event":"boot","kernel":"mnemosyne","abi":1}
+{"event":"memory","regions":16,"usable_bytes":266846208}
+{"event":"frames_ok","count":2}
+{"event":"capabilities_ok"}
+{"event":"paging_ok","fault_probes":3}
+{"event":"exception_ok","vector":3}
+{"event":"timer_ok","ticks":5}
+{"event":"boot_ok"}

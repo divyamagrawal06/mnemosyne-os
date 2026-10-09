@@ -1,0 +1,23 @@
+{
+  "captured_at_utc": "2026-10-09T05:19:32.155766+00:00",
+  "code_commit": "44b739ddf513031f0b81fee402e484c156ab41a6",
+  "scope": "Recorded correctness checks; not performance measurements",
+  "host_tests_passed": 24,
+  "replayed_requests": 12,
+  "trace_events": 60,
+  "files": {
+    "boot.log": {
+      "sha256": "fa5efce469c8de08ab256658a2a620d18d988f648ad60df5ef901cc7f338a425"
+    },
+    "boot-release.log": {
+      "sha256": "36aacbfa3b4311a03d7216379d0e304296cb35828e91605aea598a0272fe3199"
+    },
+    "tests.log": {
+      "sha256": "aeb004ca38a30f1ff2371e48ef19f8df435bdb4be697885b102bc4f375e7eeea"
+    },
+    "replay-demo.json": {
+      "sha256": "d34471bd71689eabcae203fcf853c5dc0cbbfde2f77bb1c56468fe1be2b35cbe"
+    }
+  },
+  "text_normalization": "LF line endings and one final newline"
+}
