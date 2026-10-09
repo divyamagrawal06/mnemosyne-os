@@ -2,6 +2,8 @@
 /build/
 /.tools/
 /research/cache/
+/.playwright-cli/
+/output/playwright/
 **/__pycache__/
 *.pyc
 .env

@@ -122,13 +122,19 @@ class ManagerTests(unittest.TestCase):
 
     def test_restart_marks_interrupted_run(self):
         self.manager.storage.mkdir(parents=True)
-        previous = {"schema": 1, "status": "running", "stages": [dict(dashboard.new_stage("demo"), status="running")]}
+        previous = {"schema": 1, "id": "123456abcdef", "status": "running", "stages": [dict(dashboard.new_stage("demo"), status="running")]}
         (self.manager.storage / "latest.json").write_text(json.dumps(previous), encoding="utf-8")
         restarted = dashboard.RunManager(Path(self.temp.name))
         latest = restarted.snapshot()["latest"]
         self.assertEqual(latest["status"], "interrupted")
         self.assertEqual(latest["stages"][0]["status"], "interrupted")
         self.assertFalse(restarted.snapshot()["busy"])
+
+    def test_malformed_saved_record_does_not_break_startup(self):
+        self.manager.storage.mkdir(parents=True)
+        for invalid in ([], {"schema":1, "stages":[]}, {"schema":1, "stages":["invalid"]}, {"schema":1, "stages":[{}]}):
+            (self.manager.storage / "latest.json").write_text(json.dumps(invalid), encoding="utf-8")
+            self.assertIsNone(dashboard.RunManager(Path(self.temp.name)).snapshot()["latest"])
 
 
 class HttpBoundaryTests(unittest.TestCase):
@@ -166,6 +172,7 @@ class HttpBoundaryTests(unittest.TestCase):
         for headers in ({"Content-Type":"application/json"},
                         dict(self.headers, Origin="https://untrusted.example"),
                         dict(self.headers, **{"X-Mnemosyne-Token":"invalid"}),
+                        dict(self.headers, **{"X-Mnemosyne-Token":"\u00e9"}),
                         dict(self.headers, **{"Sec-Fetch-Site":"cross-site"})):
             status, _ = self.request("POST", "/api/runs", {"suite":"demo"}, headers)
             self.assertEqual(status, 403)

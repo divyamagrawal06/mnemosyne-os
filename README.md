@@ -50,11 +50,21 @@ Clock and random providers are controlled synthetic inputs. Effects are observat
 
 Open the [30-slide PowerPoint](presentation/output/MnemosyneOS-Pitch.pptx), [viewing PDF](presentation/output/MnemosyneOS-Pitch.pdf), or [speaker notes](presentation/output/MnemosyneOS-Speaker-Notes.md). The [complete demo guide](presentation/demo-runbook.md) includes narration, exact commands, expected results, setup, and failure fallback. [Presentation source and editing instructions](presentation/README.md) are included.
 
+Launch the local browser dashboard:
+
+```sh
+python tools/dashboard.py --open
+```
+
+It serves [http://127.0.0.1:8765](http://127.0.0.1:8765) and provides live demo controls, kernel events, test filtering, state comparisons, the actual replay trace, raw logs, and evidence export. It uses Python's standard library and browser APIs; no npm install is needed. See the [UI guide](ui/README.md) for the presentation route and runner boundaries.
+
+The CLI route remains available:
+
 ```sh
 python tools/present.py
 ```
 
-The guided CLI runs kernel boot, host tests, and the Wasmi replay experiment with a pause before each step. Use `--auto` for rehearsal, `--host-only` to skip QEMU, or `--recorded` to show explicitly labeled saved evidence. The present interface is a CLI and serial output; a graphical OS interface and benchmark dashboard are future work.
+The guided CLI runs kernel boot, host tests, and the Wasmi replay experiment with a pause before each step. Use `--auto` for rehearsal, `--host-only` to skip QEMU, or `--recorded` to show explicitly labeled saved evidence. The dashboard is a host demonstration UI, not a guest desktop. Statistical benchmark tooling and the remaining OS services are future work. The original pitch deck preserves its explicitly stated `44b739d` baseline; the dashboard is a subsequent increment.
 
 ## Research sources
 

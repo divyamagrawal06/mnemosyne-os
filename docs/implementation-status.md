@@ -14,7 +14,7 @@ The first build uses native Windows Cargo and an existing Ubuntu WSL distributio
 | Replay | Host fixture checkpoint at handler boundaries, full memory/global capture, checkpoint-bound event log, input injection, output validation, poisoned-instance recovery | Durable log, IPC transport, COW checkpoints, consistent service-group snapshots and replay beyond the fixed fixture |
 | Recovery policy | Architecture and threat assumptions researched | Typed plan representation, deterministic authority/resource verifier, transactional executor and AI adapter |
 | Storage | Protocols and failure cases researched | Block driver, ChronicleFS, commit records, flush ordering, reboot recovery and crash tests |
-| Evaluation | Bounded QEMU smoke test and host correctness tests; replay demo emits JSON | Statistical benchmark runner, fault campaign, dashboard and performance conclusions |
+| Evaluation and UI | Bounded QEMU smoke test and host correctness tests; replay demo emits JSON with its actual trace; local browser dashboard runs suites, inspects evidence and exports results | Statistical benchmark runner, fault campaign and performance conclusions |
 
 The timer test establishes interrupt delivery. It does not establish that a scheduler can preempt a running process. Capability tests establish table behavior under its trusted-caller contract, not system-wide confinement. Wasmi's upstream validation is reused; neither the kernel nor the recovery design is formally verified.
 
@@ -51,3 +51,5 @@ python tools/dev.py boot --release
 ```
 
 Host checks run without WSL. `demo` saves `build/replay-demo.json`; `boot` saves `build/boot.log` and `build/mnemosyne.iso`. Generated outputs are ignored by Git. Dependency versions and registry checksums are committed in `Cargo.lock`; copied code and bootloader pins are documented in `THIRD_PARTY.md`.
+
+`python tools/dashboard.py --open` starts the host UI at `http://127.0.0.1:8765`. It runs the same bounded CLI stages, keeps recorded and live evidence separate, and saves the latest run under `build/dashboard/latest.json`. Its event inspector reads the actual exported replay events. The browser UI does not run in the kernel or establish statistical performance measurements. Runner boundary tests use `python -m unittest discover -s tools -p test_dashboard.py`.

@@ -162,7 +162,13 @@ class RunManager:
         self.persistence_error = None
         try:
             previous = json.loads((self.storage / "latest.json").read_text(encoding="utf-8"))
-            if previous.get("schema") == 1 and isinstance(previous.get("stages"), list):
+            valid_stages = isinstance(previous, dict) and isinstance(previous.get("stages"), list) and 1 <= len(previous["stages"]) <= 3 and all(
+                isinstance(stage, dict) and stage.get("kind") in LABELS
+                and stage.get("status") in {"pending", "running", "passed", "failed", "skipped", "interrupted"}
+                for stage in previous["stages"])
+            if (valid_stages and previous.get("schema") == 1
+                    and previous.get("status") in {"running", "passed", "failed", "stopped", "interrupted"}
+                    and re.fullmatch(r"[0-9a-f]{12}", str(previous.get("id", "")))):
                 self.latest = previous
                 if previous.get("status") == "running":
                     previous.update(status="interrupted", finished_at=now(), error="The runner stopped before this run finished. Start a new run.")
@@ -321,7 +327,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             return False
         if mutation:
             supplied = self.headers.get("X-Mnemosyne-Token", "")
-            if origin != f"http://{host}" or not secrets.compare_digest(supplied, self.server.manager.token):
+            if origin != f"http://{host}" or not secrets.compare_digest(supplied.encode("utf-8"), self.server.manager.token.encode("utf-8")):
                 self.send(403, {"error": "Refresh the dashboard before starting another run."})
                 return False
         return True

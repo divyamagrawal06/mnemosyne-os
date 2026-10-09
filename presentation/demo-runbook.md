@@ -1,6 +1,19 @@
 # MnemosyneOS presentation and demo guide
 
-The current demo uses PowerShell, a headless QEMU guest, and a host Wasmi experiment. It shows working code and real correctness checks. The kernel has no graphical desktop or interactive shell yet. The planned benchmark dashboard, ChronicleFS, isolated userspace services, and AI recovery verifier are future milestones.
+The current demo can use the local browser dashboard or PowerShell, a headless QEMU guest, and a host Wasmi experiment. It shows working code and real correctness checks. The kernel has no graphical desktop or interactive shell yet. Statistical benchmark tooling, ChronicleFS, isolated userspace services, and the AI recovery verifier are future milestones.
+
+## Browser demo route
+
+```powershell
+Set-Location 'C:\Users\ludic\Desktop\mnemosyne'
+python tools/dashboard.py --open
+```
+
+The browser opens `http://127.0.0.1:8765`. At slide 15, switch to the dashboard, select **Full demonstration**, and click **Run demo**. The source switches to **Latest run**. Follow the three stages on Overview, then inspect **Kernel**, **Test suite**, and **Replay inspector**. In Replay, compare the matching state hashes, explain the rejected histories, filter the actual trace by event type, and select an event to inspect its payload. **Raw console** exposes the original command output. **Export evidence** downloads the selected run as JSON.
+
+Use **Saved demonstration** for the original recorded fallback. Its capture date and code revision remain visible; it is not a fresh execution. That original report has aggregate results only. The trace inspector becomes available on a current live replay run. **Host checks only** skips QEMU; **Stop after step** finishes the active command and skips subsequent stages.
+
+The original deck describes its stated `44b739d` baseline. Explain that this local browser UI was added afterward and is a host control surface, not a desktop running inside the OS. The [UI guide](../ui/README.md) covers setup, persistence, and troubleshooting. The three terminal acts below remain useful for narration and as an alternative route.
 
 ## Fast start on this computer
 

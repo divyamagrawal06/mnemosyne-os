@@ -52,7 +52,8 @@ def live(automatic, host_only):
     print("MnemosyneOS live presentation demo")
     print(f"Repository: {ROOT}\nGit HEAD: {commit}")
     print("The kernel runs in QEMU. The Wasmi experiment runs separately on the host.")
-    print("The interface is a CLI. No OS desktop, ChronicleFS, or AI planner is implemented yet.")
+    print("This is the CLI route; tools/dashboard.py provides a host browser UI.")
+    print("No OS desktop, ChronicleFS, or AI planner is implemented yet.")
     transcript = []
     report = {"mode": "live-host-only" if host_only else "live", "git_head": commit,
               "started_at_utc": datetime.now(timezone.utc).isoformat(), "steps": [],
