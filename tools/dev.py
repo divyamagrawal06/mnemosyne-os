@@ -10,6 +10,7 @@ import struct
 import queue
 import threading
 import time
+import hashlib
 
 ROOT = Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
@@ -103,6 +104,13 @@ def image(release=False, shell=False):
          "boot/limine/limine-uefi-cd.bin", "-efi-boot-part", "--efi-boot-image",
          "--protective-msdos-label", linux_path(stage), "-o", linux_path(iso)]))
     run(linux_command([linux_path(LIMINE / "limine"), "bios-install", linux_path(iso)]))
+    provenance = {
+        "source-commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        "source-dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip()),
+        "sha256": hashlib.sha256(iso.read_bytes()).hexdigest(),
+        "profile": profile, "guest-shell": shell,
+    }
+    iso.with_suffix(".json").write_text(json.dumps(provenance, indent=2) + "\n", encoding="utf-8")
     return iso
 
 

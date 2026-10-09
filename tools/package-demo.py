@@ -18,7 +18,12 @@ def main():
     iso = dev.image(True, shell=True) if args.build else dev.BUILD / "mnemosyne-os-release.iso"
     if not iso.is_file():
         parser.error("release ISO missing; run guest-test --release first")
-    files = {"build/mnemosyne-os-release.iso": iso}
+    provenance = json.loads(iso.with_suffix(".json").read_text(encoding="utf-8"))
+    if provenance.get("sha256") != hashlib.sha256(iso.read_bytes()).hexdigest():
+        parser.error("ISO does not match its build provenance; rebuild")
+    if provenance.get("profile") != "release" or provenance.get("guest-shell") is not True:
+        parser.error("expected the release guest-console ISO")
+    files = {"build/mnemosyne-os-release.iso": iso, "build/mnemosyne-os-release.json": iso.with_suffix(".json")}
     for name in ["tools/dev.py", "tools/run-image.py", "tools/ai-plan.py", "README.md", "LICENSE",
                  "THIRD_PARTY.md", "docs/cloud-demo.md", "docs/professor-brief.md", "docs/implementation-status.md"]:
         files[name] = dev.ROOT / name
@@ -37,6 +42,8 @@ def main():
         dependencies.append({"package": label, "license": package.get("license"), "notice-files": [p.name for p in notices]})
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=dev.ROOT, text=True).strip()
     dirty = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=dev.ROOT, text=True).strip())
+    if provenance.get("source-commit") != revision or provenance.get("source-dirty") or dirty:
+        parser.error("package a clean, committed checkout with an ISO built from that commit")
     manifest = {"built-at": datetime.now(timezone.utc).isoformat(), "commit": revision, "dirty": dirty,
                 "profile": "release", "architecture": "x86-64", "qemu-vcpus": 1, "qemu-memory-mib": 256,
                 "files": {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in files.items()},
