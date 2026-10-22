@@ -105,6 +105,9 @@ impl Shell {
                     "replay: recover, plan-show, verify-plan <name>, recover-plan <name>, kv-add <key> <delta>"
                 );
                 println!("bench:  bench (100 IPC round trips; timer resolution 10 ms)");
+                println!(
+                    "        bench-suite (5 samples of IPC, capability, Wasm and fault checks)"
+                );
             }
             "about" => {
                 println!(
@@ -248,6 +251,7 @@ impl Shell {
                 );
             }
             "demo" | "self-test" => self.demo()?,
+            "bench-suite" => benchmark_suite()?,
             "bench" => {
                 let start = sys::ticks();
                 for i in 0..100 {
@@ -374,6 +378,82 @@ impl Shell {
         println!("{{\"event\":\"guest-demo\",\"passed\":true}}");
         Ok(())
     }
+}
+
+fn benchmark_sample(name: &str, sample: u64, operations: u64, start: u64) {
+    let elapsed = sys::ticks() - start;
+    println!(
+        "{{\"event\":\"benchmark-sample\",\"benchmark\":\"{name}\",\"sample\":{sample},\"operations\":{operations},\"elapsed-ticks\":{elapsed},\"tick-ms\":10}}"
+    );
+}
+
+/// Bounded guest measurements. Timer ticks include scheduling and emulator
+/// overhead; zero ticks mean below resolution, never zero-cost execution.
+/// Fresh workers keep traces bounded and leave the durable demo bundle intact.
+fn benchmark_suite() -> Result<()> {
+    println!(
+        "bench-suite: QEMU guest ticks include scheduling; resolution=10ms; zero means below resolution."
+    );
+    let bundle = runtime::capture_fault_demo().map_err(|e| e.to_string())?;
+    for sample in 1..=5 {
+        let start = sys::ticks();
+        for i in 0..100 {
+            rpc(0, 1000 + i)?;
+        }
+        benchmark_sample("ipc-round-trip", sample, 100, start);
+
+        let start = sys::ticks();
+        for _ in 0..1000 {
+            core::hint::black_box(sys::cap(2));
+        }
+        benchmark_sample("capability-query-syscall", sample, 1000, start);
+        let (slot, generation) = sys::cap(2);
+        let start = sys::ticks();
+        for _ in 0..1000 {
+            require(
+                sys::call(SYS_SEND, slot, generation.wrapping_add(999), 0, 0).0 == ERR_DENIED,
+                "benchmark accepted invalid authority",
+            )?;
+        }
+        benchmark_sample("capability-rejection-syscall", sample, 1000, start);
+
+        let mut worker = Worker::record(42 + sample).map_err(|e| e.to_string())?;
+        let start = sys::ticks();
+        for i in 0..100 {
+            worker
+                .apply(Request {
+                    key: i % 16,
+                    delta: i64::from(i) - 50,
+                })
+                .map_err(|e| e.to_string())?;
+        }
+        benchmark_sample("wasm-recorded-request", sample, 100, start);
+        let expected = worker.snapshot().map_err(|e| e.to_string())?.digest_hex();
+        let start = sys::ticks();
+        for _ in 0..20 {
+            core::hint::black_box(worker.snapshot().map_err(|e| e.to_string())?);
+        }
+        benchmark_sample("wasm-checkpoint-with-digest", sample, 20, start);
+        require(
+            worker.snapshot().map_err(|e| e.to_string())?.digest_hex() == expected,
+            "checkpoint changed worker state",
+        )?;
+
+        let start = sys::ticks();
+        for _ in 0..5 {
+            let report = runtime::recover_bundle(&bundle).map_err(|e| e.to_string())?;
+            require(
+                report.passed && report.state_equal && report.effects_equal,
+                "benchmark replay mismatch",
+            )?;
+        }
+        benchmark_sample("wasm-restore-replay", sample, 5, start);
+        let start = sys::ticks();
+        fault_demo()?;
+        benchmark_sample("native-fault-containment", sample, 3, start);
+    }
+    println!("{{\"event\":\"benchmark-suite\",\"passed\":true,\"samples\":35,\"tick-ms\":10}}");
+    Ok(())
 }
 
 fn rpc(value: u64, tag: u64) -> Result<u64> {
