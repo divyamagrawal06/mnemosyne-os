@@ -25,7 +25,7 @@ def main():
         parser.error("expected the release guest-console ISO")
     files = {"build/mnemosyne-os-release.iso": iso, "build/mnemosyne-os-release.json": iso.with_suffix(".json")}
     for name in ["tools/dev.py", "tools/run-image.py", "tools/ai-plan.py", "tools/dashboard.py",
-                 "tools/guest-controller.py", "README.md", "LICENSE", "THIRD_PARTY.md",
+                 "tools/guest-controller.py", "tools/guest-e2e.py", "README.md", "LICENSE", "THIRD_PARTY.md",
                  "docs/raspberry-pi-demo.md", "docs/cloud-demo.md", "docs/professor-brief.md",
                  "docs/implementation-status.md"]:
         files[name] = dev.ROOT / name

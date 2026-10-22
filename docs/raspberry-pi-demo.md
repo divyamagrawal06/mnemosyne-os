@@ -63,6 +63,23 @@ proxy in front of this service.
 
 ## Rehearse the browser flow
 
+For repeatable acceptance before the walkthrough, run:
+
+```sh
+python3 tools/guest-e2e.py --timeout 300
+```
+
+This starts a real loopback HTTP server, serves the UI assets and drives its
+API against QEMU on a new isolated disk under `build/guest-e2e-*`. It copies
+the release ISO and UI into that directory and leaves an `acceptance.json`
+record there, including failures. It checks the guest demonstration,
+benchmarks, file/snapshot restore, rejected recovery authority, reboot
+persistence and live recovery. It does not drive the browser DOM; complete
+the manual interaction rehearsal below as well. The timeout defaults to 300
+seconds per guest action and can be raised to 600 for a slower device.
+This acceptance leaves the normal dashboard disk untouched. Remove its
+isolated directory only after the test has finished if disk space is needed.
+
 1. Boot/connect the guest in the live guest workspace. Wait for its ready
    prompt and inspect the live serial console. A timeout is a failure, never
    a saved success; allow up to 300 seconds on the Pi before investigating.
