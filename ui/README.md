@@ -1,4 +1,21 @@
-# MnemosyneOS local dashboard
+# MnemosyneOS guest workspace
+
+The default page is the live OS workspace. It controls the custom x86-64 guest in QEMU through a Python standard-library server. The browser, server, and guest are separate: opening the page on a Raspberry Pi does not make the kernel a native Pi kernel.
+
+Start the dashboard with `python tools/dashboard.py`, then open <http://127.0.0.1:8765>. The guest runner needs its prebuilt release ISO, QEMU and a writable local data directory; see the [cloud and guest runbook](../docs/cloud-demo.md) for preparation and deployment. No npm runtime, remote fonts, CDN or network dependency is needed for the UI.
+
+1. Select **Start OS**. Commands are disabled until the real serial prompt is ready.
+2. **Files** lists guest files. Write a file, select **Read**, save a disk snapshot, change the file, and restore the snapshot. Restore replaces the filesystem state. File contents are single-line printable ASCII; names start with a letter or number and may contain dots, underscores or hyphens.
+3. **Tasks** shows records parsed from the guest's actual `ps` output. Refresh to obtain new counters.
+4. **Experiments** sends the displayed guest commands. Output appears in **Guest serial console**. Repeated benchmark samples use the guest's coarse 10 ms timer; zero ticks means the work completed below one timer tick, not zero elapsed time.
+5. **Recovery** displays the current plan, saves a candidate plan JSON file, and verifies it. Valid formatted JSON is compacted onto one serial command line. The maximum entire command is 480 characters. Inspect the real result before running recovery. Guest event details are raw serial JSON, not invented trace records.
+6. **Stop OS** asks an idle guest to shut down. An unresponsive or busy guest can be terminated by the runner. Inspect serial output before repeating a timed-out action.
+
+**Follow output** controls console scrolling, and the command field supports arrow-key history. **Save log** exports serial text; **Export evidence** downloads the current guest state. Polling reconnects after a host interruption, while controls stay disabled until connection and guest readiness return.
+
+The original dashboard remains at [the host evidence archive](http://127.0.0.1:8765/evidence.html). Its Wasmi replay, Cargo tests and saved baseline execute or were captured on the host. They do not establish the corresponding feature runs in the kernel. The archive documentation below describes that earlier evidence workflow.
+
+## Host evidence archive
 
 Current integrated OS demo: [cloud and guest runbook](../docs/cloud-demo.md). The original deck and saved browser evidence retain their earlier baseline.
 

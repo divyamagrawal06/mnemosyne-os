@@ -1,61 +1,46 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f4f4ed">
-  <title>MnemosyneOS · Recovery lab</title>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/style.css">
-  <script src="/app.js" defer></script>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#eef0f6">
+  <title>MnemosyneOS workspace</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/guest-style.css"><script src="/guest-app.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to workspace</a>
-  <aside class="sidebar">
-    <a class="brand" href="#overview" aria-label="MnemosyneOS overview">
-      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 25V7l11 11L27 7v18M5 16l11 11 11-11"/></svg>
-      <span>Mnemosyne<span class="brand-os">OS</span><small>RECOVERY LAB</small></span>
-    </a>
-    <div class="nav-heading">WORKSPACE</div>
-    <nav aria-label="Workspace">
-      <a href="#overview" data-nav="overview"><span data-icon="grid"></span>Overview</a>
-      <a href="#kernel" data-nav="kernel"><span data-icon="cpu"></span>Kernel</a>
-      <a href="#replay" data-nav="replay"><span data-icon="replay"></span>Replay inspector</a>
-      <a href="#tests" data-nav="tests"><span data-icon="check"></span>Test suite</a>
-      <a href="#project" data-nav="project"><span data-icon="layers"></span>Project & demo</a>
-    </nav>
-    <div class="sidebar-bottom">
-      <span class="small-label">EXPERIMENTAL SYSTEM</span>
-      <p>Small kernel.<br>Inspectable recovery.</p>
-      <div class="sidebar-scope"><span class="status-dot"></span>Host control surface</div>
-      <small>Rust kernel + Wasmi lab</small>
+  <header class="masthead">
+    <a class="brand" href="/" aria-label="MnemosyneOS workspace"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M6 28V8l12 12L30 8v20M6 18l12 12 12-12"/></svg><span>Mnemosyne<span class="brand-os">OS</span><small>Experimental operating system</small></span></a>
+    <div class="connection"><span id="connection-dot" class="dot"></span><span id="connection">Connecting to host…</span></div>
+    <a class="evidence-link" href="/evidence.html">Host evidence archive ↗</a>
+  </header>
+  <main id="main" tabindex="-1">
+    <section class="intro" aria-labelledby="page-title"><div><h1 id="page-title">A small OS, in your hands.</h1><p>Boot the guest. Inspect its tasks. Change a file, then bring it back.</p></div><div class="power-controls"><button class="primary" id="start" disabled>Start OS</button><button id="stop" disabled>Stop OS</button></div></section>
+    <div id="notice" class="notice" role="status" hidden></div>
+    <div class="scope-bar"><span class="status-pill" id="guest-status">Connecting</span><p>Browser controls the host runner. The custom x86-64 kernel executes inside QEMU.</p><span id="busy-label" aria-live="polite"></span></div>
+    <div class="desktop">
+      <section class="workbench" aria-label="Guest tools">
+        <nav class="tabs" aria-label="Guest views"><button type="button" data-tab="files" aria-current="page">Files</button><button type="button" data-tab="tasks">Tasks</button><button type="button" data-tab="experiments">Experiments</button><button type="button" data-tab="recovery">Recovery</button></nav>
+        <section id="view-files" class="view" aria-labelledby="files-heading">
+          <div class="view-heading"><div><h2 id="files-heading">Guest files</h2><p>Last observed listing from the guest disk.</p></div><button data-command="ls" class="small">Refresh</button></div>
+          <div class="data-region" id="files-list"><p class="empty">Start the OS to inspect its filesystem.</p></div>
+          <form id="file-form" class="editor"><h3>Write a file</h3><label for="file-name">Name</label><input id="file-name" name="name" value="note.txt" pattern="[A-Za-z0-9][A-Za-z0-9._-]*" maxlength="48" required autocomplete="off"><label for="file-content">Contents</label><textarea id="file-content" name="content" rows="3" maxlength="420" required placeholder="A note to your future self"></textarea><p class="hint">Names start with a letter or number. Single-line ASCII text. Writing replaces existing contents.</p><button class="primary" id="file-write" type="submit">Write to guest</button></form>
+          <details class="snapshot-tools"><summary>Disk snapshots</summary><p class="hint">Restore replaces the current guest filesystem with the selected saved state.</p><form id="snapshot-form" class="inline-form"><label class="sr-only" for="snapshot-label">Snapshot label</label><input id="snapshot-label" value="checkpoint" pattern="[A-Za-z0-9][A-Za-z0-9._-]*" maxlength="48" required><button type="submit">Save snapshot</button></form><div id="snapshots-list" class="data-region"><p class="empty">No snapshot data yet.</p></div></details>
+        </section>
+        <section id="view-tasks" class="view" aria-labelledby="tasks-heading" hidden><div class="view-heading"><div><h2 id="tasks-heading">Scheduled tasks</h2><p>Actual task records returned by the guest's <code>ps</code> command.</p></div><button class="small" data-command="ps">Refresh</button></div><div id="tasks-list" class="data-region"><p class="empty">Start the OS to inspect tasks.</p></div><p class="hint">Tasks belong to the emulated kernel. Host processes are outside this view.</p></section>
+        <section id="view-experiments" class="view" aria-labelledby="experiments-heading" hidden><div class="view-heading"><div><h2 id="experiments-heading">Exercise the kernel</h2><p>Each action sends a real command over the guest serial connection.</p></div></div><div class="action-list">
+          <div><div><h3>Integrated demonstration</h3><p>Run the guest's combined demonstration.</p></div><button data-command="demo">Run demo</button></div>
+          <div><div><h3>Capability IPC</h3><p>Exercise messages between isolated tasks.</p></div><button data-command="ipc-demo">Run IPC</button></div>
+          <div><div><h3>Authority checks</h3><p>Exercise capability permission boundaries.</p></div><button data-command="cap-demo">Check capabilities</button></div>
+          <div><div><h3>Fault isolation</h3><p>Trigger the guest's deliberate fault probe.</p></div><button data-command="fault-demo">Trigger fault</button></div>
+          <div><div><h3>Copy on write</h3><p>Exercise the guest memory snapshot path.</p></div><button data-command="cow-demo">Run COW</button></div>
+          <div><div><h3>WebAssembly</h3><p>Execute the guest's Wasm demonstration.</p></div><button data-command="wasm-demo">Run Wasm</button></div>
+          <div><div><h3>Guest self-test</h3><p>Ask the kernel to run its bounded checks.</p></div><button data-command="self-test">Run self-test</button></div>
+          <div><div><h3>Repeated benchmarks</h3><p>Real guest samples. Timer resolution is 10 ms.</p></div><button data-command="bench-suite">Run benchmarks</button></div>
+        </div><div id="benchmarks-list"></div></section>
+        <section id="view-recovery" class="view" aria-labelledby="recovery-heading" hidden><div class="view-heading"><div><h2 id="recovery-heading">Inspect recovery</h2><p>Read the plan, run recovery, and inspect the resulting guest events.</p></div></div><div class="recovery-actions"><button data-command="plan-show">Show plan</button><button data-command="recover" class="primary">Run recovery</button></div><form id="candidate-form" class="editor"><h3>Candidate recovery plan</h3><label for="candidate-name">Filename</label><input id="candidate-name" value="candidate.json" pattern="[A-Za-z0-9][A-Za-z0-9._-]*" maxlength="48" required><label for="candidate-content">Plan JSON</label><textarea id="candidate-content" rows="5" maxlength="420" required placeholder="Paste the plan from Show plan, then change a field to exercise the verifier."></textarea><p class="hint">Save the candidate to the guest disk. Then verify its filename below. The verifier decides whether the plan is safe.</p><button class="primary" type="submit">Save candidate</button></form><form id="plan-form" class="inline-form"><label class="sr-only" for="plan-name">Guest plan filename</label><input id="plan-name" placeholder="plan.txt" pattern="[A-Za-z0-9][A-Za-z0-9._-]*" maxlength="48" required aria-describedby="plan-help"><button type="submit">Verify plan</button></form><p id="plan-help" class="hint">Write a candidate plan as a guest file, then check it before recovery. Rejected plans stay rejected.</p><h3 class="section-title">Observed guest events</h3><div id="events-list" class="event-list"><p class="empty">Guest events will appear after boot.</p></div><p class="hint">Retained events from the current boot, newest first. These are guest serial records. The separate <a href="/evidence.html#replay">host replay inspector</a> contains host Wasmi evidence and is labeled independently.</p></section>
+      </section>
+      <section class="terminal" aria-labelledby="terminal-heading"><div class="terminal-heading"><div><span class="terminal-light" aria-hidden="true"></span><h2 id="terminal-heading">Guest serial console</h2></div><label class="follow-label"><input type="checkbox" id="follow" checked> Follow output</label></div><div class="console-meta"><span id="last-command">No command sent</span><div><a href="/api/guest/export" download>Export evidence</a><button id="download-log" type="button">Save log</button></div></div><pre id="serial-log" tabindex="0" aria-label="Live guest serial output">Connecting to the host runner…</pre><div id="result-status" class="result-status" role="status">Commands become available when the guest is ready.</div><form id="command-form" class="command-form"><label for="command">guest &gt;</label><input id="command" placeholder="help" maxlength="480" autocomplete="off" spellcheck="false" aria-describedby="command-help" required><button id="send" type="submit" disabled>Send</button></form><p id="command-help" class="terminal-hint">Try <button data-command="help">help</button>, <button data-command="about">about</button> or <button data-command="uptime">uptime</button>. ↑ / ↓ recalls command history.</p></section>
     </div>
-  </aside>
-  <div class="workspace">
-    <header class="topbar">
-      <div class="breadcrumb">Workspace <span>/</span> <strong id="breadcrumb">Overview</strong></div>
-      <div class="top-actions"><span id="connection" class="connection">Connecting…</span><span class="separator"></span><a href="/files/pitch.pdf" target="_blank" rel="noopener">Pitch deck <span aria-hidden="true">↗</span></a></div>
-    </header>
-    <main id="main" tabindex="-1">
-      <div id="notice" class="notice" role="status" hidden></div>
-      <div class="page-heading">
-        <div><p class="eyebrow" id="eyebrow">DEMONSTRATION WORKSPACE</p><h1 id="title">Service recovery, observed.</h1><p class="page-description" id="description">Boot, verify, and replay the working prototype.</p></div>
-        <div class="run-controls">
-          <label class="sr-only" for="suite">Run selection</label>
-          <select id="suite"><option value="full">Full demonstration</option><option value="host">Host checks only</option><option value="boot">Kernel boot only</option><option value="test">Tests only</option><option value="demo">Replay only</option></select>
-          <button id="run" class="button primary" disabled><span data-icon="play"></span><span>Run demo</span></button>
-          <button id="stop" class="button subtle" hidden>Stop after step</button>
-        </div>
-      </div>
-      <div class="evidence-toolbar">
-        <div class="segmented" role="group" aria-label="Evidence source"><button data-source="saved" aria-pressed="true">Saved demonstration</button><button data-source="latest" aria-pressed="false">Latest run</button></div>
-        <a id="download" class="text-link" href="/api/export/saved" aria-label="Export selected evidence as JSON" download><span data-icon="download"></span>Export evidence</a>
-      </div>
-      <div id="provenance" class="provenance">Loading the local evidence archive…</div>
-      <section id="content" aria-label="Selected evidence"><div class="loading-surface">Connecting to the local runner…</div></section>
-      <footer class="page-footer"><span>MnemosyneOS research prototype</span><span>Kernel in QEMU · Replay on the host · No cloud services</span></footer>
-    </main>
-  </div>
-  <div id="announcer" class="sr-only" role="status" aria-live="polite"></div>
+    <footer><span>MnemosyneOS research prototype</span><span>Browser → host runner → QEMU → custom kernel</span></footer>
+  </main>
 </body>
 </html>

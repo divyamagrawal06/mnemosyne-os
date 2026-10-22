@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f4ed">
+  <title>MnemosyneOS · Recovery lab</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to workspace</a>
+  <aside class="sidebar">
+    <a class="brand" href="#overview" aria-label="MnemosyneOS overview">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 25V7l11 11L27 7v18M5 16l11 11 11-11"/></svg>
+      <span>Mnemosyne<span class="brand-os">OS</span><small>RECOVERY LAB</small></span>
+    </a>
+    <div class="nav-heading">WORKSPACE</div>
+    <nav aria-label="Workspace">
+      <a href="#overview" data-nav="overview"><span data-icon="grid"></span>Overview</a>
+      <a href="#kernel" data-nav="kernel"><span data-icon="cpu"></span>Kernel</a>
+      <a href="#replay" data-nav="replay"><span data-icon="replay"></span>Replay inspector</a>
+      <a href="#tests" data-nav="tests"><span data-icon="check"></span>Test suite</a>
+      <a href="#project" data-nav="project"><span data-icon="layers"></span>Project & demo</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <span class="small-label">EXPERIMENTAL SYSTEM</span>
+      <p>Small kernel.<br>Inspectable recovery.</p>
+      <div class="sidebar-scope"><span class="status-dot"></span>Host control surface</div>
+      <small>Rust kernel + Wasmi lab</small>
+    </div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <div class="breadcrumb">Workspace <span>/</span> <strong id="breadcrumb">Overview</strong></div>
+      <div class="top-actions"><span id="connection" class="connection">Connecting…</span><span class="separator"></span><a href="/files/pitch.pdf" target="_blank" rel="noopener">Pitch deck <span aria-hidden="true">↗</span></a></div>
+    </header>
+    <main id="main" tabindex="-1">
+      <div id="notice" class="notice" role="status" hidden></div>
+      <div class="page-heading">
+        <div><p class="eyebrow" id="eyebrow">DEMONSTRATION WORKSPACE</p><h1 id="title">Service recovery, observed.</h1><p class="page-description" id="description">Boot, verify, and replay the working prototype.</p></div>
+        <div class="run-controls">
+          <label class="sr-only" for="suite">Run selection</label>
+          <select id="suite"><option value="full">Full demonstration</option><option value="host">Host checks only</option><option value="boot">Kernel boot only</option><option value="test">Tests only</option><option value="demo">Replay only</option></select>
+          <button id="run" class="button primary" disabled><span data-icon="play"></span><span>Run demo</span></button>
+          <button id="stop" class="button subtle" hidden>Stop after step</button>
+        </div>
+      </div>
+      <div class="evidence-toolbar">
+        <div class="segmented" role="group" aria-label="Evidence source"><button data-source="saved" aria-pressed="true">Saved demonstration</button><button data-source="latest" aria-pressed="false">Latest run</button></div>
+        <a id="download" class="text-link" href="/api/export/saved" aria-label="Export selected evidence as JSON" download><span data-icon="download"></span>Export evidence</a>
+      </div>
+      <div id="provenance" class="provenance">Loading the local evidence archive…</div>
+      <section id="content" aria-label="Selected evidence"><div class="loading-surface">Connecting to the local runner…</div></section>
+      <footer class="page-footer"><span>MnemosyneOS research prototype</span><span>Kernel in QEMU · Replay on the host · No cloud services</span></footer>
+    </main>
+  </div>
+  <div id="announcer" class="sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>
