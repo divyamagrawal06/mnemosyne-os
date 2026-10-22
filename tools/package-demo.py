@@ -27,7 +27,7 @@ def main():
     for name in ["tools/dev.py", "tools/run-image.py", "tools/ai-plan.py", "tools/dashboard.py",
                  "tools/guest-controller.py", "tools/guest-e2e.py", "README.md", "LICENSE", "THIRD_PARTY.md",
                  "docs/raspberry-pi-demo.md", "docs/cloud-demo.md", "docs/professor-brief.md",
-                 "docs/implementation-status.md"]:
+                 "docs/implementation-status.md", "docs/end-to-end-status.md"]:
         files[name] = dev.ROOT / name
     for directory in ("ui", "deployment", "presentation/evidence"):
         for path in (dev.ROOT / directory).rglob("*"):
