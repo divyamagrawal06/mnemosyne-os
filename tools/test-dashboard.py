@@ -183,6 +183,22 @@ class HttpBoundaryTests(unittest.TestCase):
         for path in ("/../AGENTS.md", "/%2e%2e/AGENTS.md", "/tools/dev.py"):
             self.assertEqual(self.request("GET", path)[0], 404)
 
+    def test_guest_routes_enforce_auth_and_command_grammar(self):
+        status, state = self.request("GET", "/api/guest")
+        self.assertEqual(status, 200)
+        self.assertEqual(state["status"], "stopped")
+        self.assertEqual(state["token"], self.manager.token)
+        for body in ({"command":"cat ../secret"}, {"command":"ps", "path":"evil"}, {"command":None}):
+            self.assertEqual(self.request("POST", "/api/guest/command", body, self.headers)[0], 400)
+        self.assertEqual(self.request("POST", "/api/guest/command", {"command":"ps"}, self.headers)[0], 409)
+        self.assertEqual(self.request("POST", "/api/guest/start", {}, {"Content-Type":"application/json"})[0], 403)
+        self.assertEqual(self.request("POST", "/api/guest/start", {}, self.headers)[0], 409)
+        self.assertEqual(self.request("POST", "/api/guest/stop", {}, self.headers)[0], 202)
+        status, exported = self.request("GET", "/api/guest/export")
+        self.assertEqual(status, 200)
+        self.assertNotIn("token", exported)
+        self.assertEqual(exported["events"], [])
+
     def test_only_fixed_suite_payload_is_accepted(self):
         for body in ({"suite":"shell"}, {"suite":"demo", "args":["untrusted"]},
                      {"suite":["demo"]}, ["demo"]):

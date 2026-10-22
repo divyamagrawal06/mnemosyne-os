@@ -1,9 +1,10 @@
-"""Loopback-only presentation dashboard; Python standard library, no web install.
+"""Loopback-only guest control and evidence dashboard; Python standard library, no web install.
 
-The browser can select only fixed demo suites. It cannot submit shell commands,
-paths, environment variables, or command arguments. Run with Python 3.10+.
+The browser can submit only allowlisted guest commands or fixed host demo suites.
+Host paths, shell commands and process arguments remain server-controlled. Run with Python 3.10+.
 """
 import argparse
+import importlib.util
 from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
@@ -23,6 +24,11 @@ import uuid
 import webbrowser
 
 ROOT = Path(__file__).resolve().parent.parent
+_guest_spec = importlib.util.spec_from_file_location('mnemosyne_guest', ROOT / 'tools' / 'guest-controller.py')
+_guest_module = importlib.util.module_from_spec(_guest_spec)
+_guest_spec.loader.exec_module(_guest_module)
+GuestController = _guest_module.GuestController
+
 LOG_LIMIT = 131_072
 STEP_TIMEOUT = 240
 SUITES = {"full": ("boot", "test", "demo"), "host": ("test", "demo"),
@@ -278,6 +284,9 @@ class RunManager:
 
 
 ASSETS = {"/": ("ui/index.html", "text/html; charset=utf-8"),
+          "/evidence.html": ("ui/evidence.html", "text/html; charset=utf-8"),
+          "/guest-app.js": ("ui/guest-app.js", "text/javascript; charset=utf-8"),
+          "/guest-style.css": ("ui/guest-style.css", "text/css; charset=utf-8"),
           "/app.js": ("ui/app.js", "text/javascript; charset=utf-8"),
           "/style.css": ("ui/style.css", "text/css; charset=utf-8"),
           "/favicon.svg": ("ui/favicon.svg", "image/svg+xml"),
@@ -339,7 +348,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
             return
         path = urlsplit(self.path).path
         manager = self.server.manager
-        if path == "/api/state":
+        if path in ("/api/guest", "/api/guest/export"):
+            state = self.server.guest.snapshot()
+            if not path.endswith("export"):
+                state["token"] = manager.token
+            self.send(200, state, attachment="mnemosyne-guest.json" if path.endswith("export") else None)
+        elif path == "/api/state":
             self.send(200, manager.snapshot())
         elif path in ("/api/export/latest", "/api/export/saved"):
             source = path.rsplit("/", 1)[1]
@@ -369,7 +383,16 @@ class DashboardHandler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(size))
             if not isinstance(body, dict):
                 raise ValueError("Expected a JSON object.")
-            if self.path == "/api/runs" and set(body) == {"suite"} and isinstance(body["suite"], str):
+            if self.path in ("/api/guest/start", "/api/guest/stop") and not body:
+                if self.path.endswith("start"):
+                    self.server.guest.start()
+                else:
+                    self.server.guest.stop()
+                self.send(202, self.server.guest.snapshot())
+            elif self.path == "/api/guest/command" and set(body) == {"command"}:
+                self.server.guest.command(body["command"])
+                self.send(202, self.server.guest.snapshot())
+            elif self.path == "/api/runs" and set(body) == {"suite"} and isinstance(body["suite"], str):
                 run_id = self.server.manager.start(body["suite"])
                 self.send(202, {"id": run_id})
             elif self.path == "/api/stop" and set(body) == {"id"} and isinstance(body["id"], str):
@@ -381,22 +404,39 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.send(400, {"error": str(error)})
         except RuntimeError as error:
             self.send(409, {"error": str(error)})
+        except (OSError, subprocess.SubprocessError) as error:
+            self.send(503, {"error": str(error)})
 
 
-def make_server(port=8765, manager=None):
-    server = ThreadingHTTPServer(("127.0.0.1", port), DashboardHandler)
+class DashboardServer(ThreadingHTTPServer):
+    def server_close(self):
+        if hasattr(self, "guest"):
+            self.guest.close()
+        super().server_close()
+
+
+def make_server(port=8765, manager=None, guest=None, guest_timeout=180):
+    server = DashboardServer(("127.0.0.1", port), DashboardHandler)
     server.manager = manager or RunManager()
+    server.guest = guest or GuestController(server.manager.root, timeout=guest_timeout)
     return server
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--guest-timeout", type=int, default=180, help="maximum guest boot or command seconds (10–600)")
     parser.add_argument("--open", action="store_true", help="open the dashboard in your default browser")
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
         parser.error("--port must be between 1 and 65535")
-    server = make_server(args.port)
+    if not 10 <= args.guest_timeout <= 600:
+        parser.error("--guest-timeout must be between 10 and 600")
+    server = make_server(args.port, guest_timeout=args.guest_timeout)
+    if hasattr(signal, "SIGTERM"):
+        def terminate_dashboard(signum, frame):
+            raise KeyboardInterrupt
+        signal.signal(signal.SIGTERM, terminate_dashboard)
     url = f"http://127.0.0.1:{server.server_port}"
     print(f"MnemosyneOS dashboard: {url}\nLocal host UI. Press Ctrl+C to stop.\n", flush=True)
     if args.open:
