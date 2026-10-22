@@ -16,7 +16,9 @@ are development hosts; QEMU supplies virtual hardware.
 | Replay | Durable checkpoint/input-log bundle; trap poisoning; fresh restore; state/effect equality; resumed live requests | Full-copy Wasm checkpoints; synthetic time/random; effects held in memory |
 | Policy | Typed JSON DSL, identity/authority/privilege/budget/rollback checks, execution-time revalidation | One action: restore-replay; tested deterministic verifier, no formal proof |
 | AI | Optional host OpenAI adapter, strict schema, bounded I/O, offline candidates, guest verification | Online mode needs user credentials/model; not exercised by offline tests |
-| Evaluation | Host failure tests, two-boot guest acceptance, task/COW counters, replay timings, 100-round-trip IPC command | Coarse QEMU/10-ms measurements, no statistical hardware conclusions |
+| Frontend | Live guest start/stop, serial console, files/snapshots/tasks, fault/replay/policy actions and evidence export | Host UI over loopback; remote access through SSH tunnel |
+| Evaluation | Failure tests, real HTTP/two-boot acceptance, task/COW counters, 35 guest benchmark samples across seven operations | Coarse QEMU/10-ms measurements, no hardware performance conclusions |
+| Pi deployment | Prebuilt package, integrity preflight, install/start scripts and optional user service | ARM64 Linux hosts x86-64 TCG; physical Pi testing and native ARM boot not completed |
 
 ## Trust boundary
 
@@ -63,6 +65,9 @@ python tools/dev.py build
 python tools/dev.py check
 python tools/test-dashboard.py
 python tools/test-ai-plan.py
+python tools/test-guest-controller.py
+python tools/test-guest-controller.py --live
+python tools/guest-e2e.py
 python tools/dev.py boot
 python tools/dev.py boot --release
 python tools/dev.py guest-test
@@ -75,9 +80,9 @@ bundle and accepts a new KV request. Logs: `build/guest-demo.log` and
 `build/guest-reboot.log`. Context: `build/recovery-context.json`. Each QEMU boot is
 bounded to 120 seconds, one CPU, 256 MiB, and no NIC. Cargo uses two jobs.
 
-The original presentation/dashboard archive describes its earlier `44b739d`
-baseline. Use the current [professor brief](professor-brief.md) and
-[guest/cloud runbook](cloud-demo.md) for the integrated OS.
+The original presentation/host dashboard archive describes its earlier `44b739d`
+baseline. Use the [end-to-end status](end-to-end-status.md) and
+[Pi runbook](raspberry-pi-demo.md) for the current live frontend and deployment.
 
 The [recorded guest log](evidence/guest-demo.log),
 [reboot/rejection log](evidence/guest-reboot.log) and

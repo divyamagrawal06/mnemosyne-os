@@ -2,7 +2,31 @@
 
 A bootable Rust research OS for capability-controlled services, deterministic
 replay and policy-checked recovery. It has its own kernel and interactive serial
-console. Run it inside QEMU locally or on a non-Azure Linux cloud VM.
+console. Run it inside QEMU locally, on Linux, or on a Raspberry Pi running
+64-bit Raspberry Pi OS. The Pi hosts x86-64 emulation, not a native ARM port.
+
+## Browser demo and Raspberry Pi
+
+The frontend now controls the **real running guest**: start/stop, serial commands,
+files, snapshot restore, tasks, fault injection, Wasm recovery, policy verification
+and repeated benchmark samples. It uses local Python and browser assets with no
+npm install or model credentials required.
+
+With the prebuilt bundle extracted on the Pi:
+
+```sh
+sh deployment/install-demo.sh
+sh deployment/start-demo.sh --guest-timeout 300
+```
+
+Open `http://127.0.0.1:8765` on the Pi, or use the SSH tunnel described in the
+[Pi deployment guide](docs/raspberry-pi-demo.md). Select **Start OS**, then
+**Experiments → Run demo**. The Files and Recovery tabs operate on guest state.
+Stop OS before ending the presentation; its dedicated disk persists across boots.
+
+On the development host: `python tools/dashboard.py --open`.
+For automated real HTTP/QEMU acceptance: `python tools/guest-e2e.py`.
+See [current completion and validation](docs/end-to-end-status.md).
 
 **Working now:** ring-3 tasks with private page tables, preemptive scheduling,
 checked syscalls, capability IPC, fault containment, native service copy-on-write
@@ -89,9 +113,9 @@ offline candidate. It never executes commands. The guest verifies the plan befor
 recovery. Online mode requires the user's API key and explicit model; see
 [the AI walkthrough](docs/cloud-demo.md#optional-ai-proposal).
 
-`python tools/dashboard.py --open` launches the older host evidence dashboard.
-It runs hardware smoke tests and the host replay experiment, separately from
-the guest shell. See the [UI guide](ui/README.md).
+`python tools/dashboard.py --open` launches the live guest workspace. The older
+host experiment dashboard remains available at `/evidence.html`, clearly
+separate from current guest evidence. See the [UI guide](ui/README.md).
 
 ## Presentation and research
 
