@@ -24,9 +24,15 @@ def main():
     if provenance.get("profile") != "release" or provenance.get("guest-shell") is not True:
         parser.error("expected the release guest-console ISO")
     files = {"build/mnemosyne-os-release.iso": iso, "build/mnemosyne-os-release.json": iso.with_suffix(".json")}
-    for name in ["tools/dev.py", "tools/run-image.py", "tools/ai-plan.py", "README.md", "LICENSE",
-                 "THIRD_PARTY.md", "docs/cloud-demo.md", "docs/professor-brief.md", "docs/implementation-status.md"]:
+    for name in ["tools/dev.py", "tools/run-image.py", "tools/ai-plan.py", "tools/dashboard.py",
+                 "tools/guest-controller.py", "README.md", "LICENSE", "THIRD_PARTY.md",
+                 "docs/raspberry-pi-demo.md", "docs/cloud-demo.md", "docs/professor-brief.md",
+                 "docs/implementation-status.md"]:
         files[name] = dev.ROOT / name
+    for directory in ("ui", "deployment", "presentation/evidence"):
+        for path in (dev.ROOT / directory).rglob("*"):
+            if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc":
+                files[path.relative_to(dev.ROOT).as_posix()] = path
     for path in (dev.ROOT / "docs/evidence").glob("*"):
         files["docs/evidence/" + path.name] = path
     for path in (dev.ROOT / "third-party/licenses").glob("*"):
@@ -65,6 +71,7 @@ def main():
         parser.error("package a clean, committed checkout with an ISO built from that commit")
     manifest = {"built-at": datetime.now(timezone.utc).isoformat(), "commit": revision, "dirty": dirty,
                 "profile": "release", "architecture": "x86-64", "qemu-vcpus": 1, "qemu-memory-mib": 256,
+                "deployment": "64-bit Linux; ARM64 hosts use x86-64 TCG emulation, not native ARM boot",
                 "files": {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in files.items()},
                 "dependency-notices": dependencies}
     args.out.parent.mkdir(parents=True, exist_ok=True)

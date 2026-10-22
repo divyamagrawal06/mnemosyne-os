@@ -1,5 +1,7 @@
 """Run the prebuilt OS ISO. Requires Python 3 and QEMU, not a Rust toolchain."""
 import argparse
+import hashlib
+import json
 from pathlib import Path
 import subprocess
 import time
@@ -14,6 +16,12 @@ def main():
     args = parser.parse_args()
     if not args.image.is_file():
         parser.error("ISO missing; build with python tools/dev.py os-image --release, or unpack the demo bundle")
+    provenance_path = args.image.with_suffix(".json")
+    if not provenance_path.is_file():
+        parser.error("ISO provenance JSON missing; use the matching prebuilt bundle")
+    provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
+    if provenance.get("sha256") != hashlib.sha256(args.image.read_bytes()).hexdigest():
+        parser.error("ISO checksum differs from provenance; restore the matching prebuilt bundle")
     if args.self_test:
         disk = dev.disk_image(dev.BUILD / f"prebuilt-test-{time.time_ns()}.img")
         dev.guest_acceptance(args.image, disk)
