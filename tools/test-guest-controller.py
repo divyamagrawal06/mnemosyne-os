@@ -120,7 +120,9 @@ def live():
                 state = wait(controller)
             assert state['last_result']['ok'] is False
             assert state['events'] == [], 'Untrusted file content became trusted event evidence'
+            stopped_process = controller.process
             controller.stop()
+            assert stopped_process.returncode == 33, 'Idle stop did not use guest shutdown'
             assert controller.snapshot()['status'] == 'stopped'
             controller.start()
             wait(controller)
@@ -129,7 +131,7 @@ def live():
             assert 'survived-reboot' in state['last_result']['output'], state
             assert any(f['name'] == 'proof.txt' for f in state['files'])
             assert any(s['label'] == 'evidence' for s in state['snapshots'])
-            print('Live QEMU: four tasks, actual guest failure, stop/restart, file and snapshot persistence passed.')
+            print('Live QEMU: timeout cleanup/restart, four tasks, rejected evidence injection, guest error, graceful shutdown, file and snapshot persistence passed.')
         finally:
             controller.close()
         assert not (Path(folder)/'guest-disk.lock').exists()
