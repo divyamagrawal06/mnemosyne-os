@@ -43,6 +43,12 @@ Effects are compared in memory, so no exactly-once external delivery is claimed.
 
 ## What to show
 
+For the Pi presentation, use the [prebuilt deployment runbook](raspberry-pi-demo.md).
+Open the live workspace, choose **Start OS**, then **Experiments → Run demo**.
+The browser controls the actual guest serial console and displays its files,
+tasks, recovery events and benchmark samples. On the Pi, Linux hosts QEMU's x86
+emulator; this is not a native ARM port. See [current validation](end-to-end-status.md).
+
 Boot QEMU and type `demo`, then `ps`, `ls`, and `snapshots`. Write a file, shut down,
 reboot and read it. Run `recover` and `kv-add 1 2` to show a recovered application
 accepting a new request. Automated `guest-test --release` also rejects an unsafe

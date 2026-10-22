@@ -1,6 +1,6 @@
 # Integrated demo status
 
-Updated 22 October 2026. The deliverable is a bootable research OS with a real
+Updated 23 October 2026. The deliverable is a bootable research OS with a real
 browser control path and a prebuilt Raspberry Pi deployment bundle. It is not a
 general-purpose desktop OS or a native Raspberry Pi firmware image.
 
@@ -48,15 +48,20 @@ exactly-once external-effect protocol.
 ## Validation
 
 - 40 shared Rust tests and formatting/Clippy checks pass.
-- 14 dashboard HTTP tests, 5 controller boundary tests and 4 AI adapter tests pass.
+- 14 dashboard HTTP tests, 6 controller boundary tests and 4 AI adapter tests pass.
+  A concurrent-restart regression checks that stale cleanup cannot stop a new guest.
 - A real controller/QEMU test checks timeout cleanup and restart, four tasks,
   rejection of forged file-based evidence, error propagation, graceful shutdown
   with exit status 33, and file/snapshot persistence after reboot.
 - `tools/guest-e2e.py` exercises the real HTTP server and QEMU on an isolated
   disk: complete demo, 35 benchmark samples, file edits/snapshot restore, unsafe
   plan rejection, command-injection rejection, reboot, replay and live KV request.
-- Browser interactions are checked separately from HTTP acceptance. See the
-  final handoff for the browser run and hardware limitations.
+- The extracted prebuilt bundle passed the same HTTP/QEMU acceptance on Linux,
+  including manifest/ISO integrity and dependency-notice checks.
+- Chromium browser interactions passed boot, file creation, integrated demo,
+  candidate-plan save/rejection, recovery, rendering all 35 benchmark samples,
+  stop/reboot persistence and the four-task view. Desktop and 390-pixel layouts
+  were visually inspected. This is a host browser test, not physical Pi evidence.
 
 Run these yourself:
 
