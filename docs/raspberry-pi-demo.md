@@ -143,6 +143,12 @@ if you enabled it solely for this demonstration.
   follows from an x86 host smoke test.
 - Port busy: stop the previous service or choose another loopback port.
 - Disk locked or guest already running: stop the earlier process; one QEMU
-  instance owns a disk at a time. Do not copy a live disk as a backup.
+  instance owns a disk at a time. Do not copy a live disk as a backup. After an
+  interrupted host session, a stale `build/dashboard/guest-disk.lock` may remain.
+  Stop the dashboard and inspect `pgrep -af qemu-system-x86_64` on the Pi. Only
+  after confirming no QEMU process owns this disk, remove that specific lock with
+  `rm -- build/dashboard/guest-disk.lock` from the unpacked directory and restart.
+  On Windows development hosts, also inspect QEMU inside the configured WSL
+  distribution. Removing a lock while its guest is alive risks disk corruption.
 - Package creation fails on dirty provenance: commit the intended files,
   rebuild the release ISO from that clean revision, then package again.
