@@ -3,6 +3,8 @@ import importlib.util
 from pathlib import Path
 import sys
 import tempfile
+import threading
+from unittest.mock import Mock
 import time
 import unittest
 
@@ -75,6 +77,49 @@ class BoundaryTests(unittest.TestCase):
                 controller.start()
             self.assertFalse((controller.folder/'guest-disk.lock').exists())
             self.assertFalse(controller.snapshot()['busy'])
+
+    def test_stale_start_cleanup_cannot_stop_concurrently_replaced_guest(self):
+        observed = threading.Event()
+        replaced = threading.Event()
+
+        class PausedController(guest.GuestController):
+            def stop(self, error=None, expected_process=None):
+                if expected_process is not None:
+                    observed.set()
+                    if not replaced.wait(timeout=5):
+                        raise AssertionError('Replacement was not installed')
+                return super().stop(error, expected_process)
+
+        controller = PausedController(Path('.'))
+        old = Mock()
+        old.poll.return_value = 33
+        replacement = Mock()
+        replacement.poll.return_value = None
+        controller.process = old
+        failures = []
+
+        def restart():
+            try:
+                controller.start()
+            except Exception as error:
+                failures.append(error)
+
+        thread = threading.Thread(target=restart)
+        thread.start()
+        self.assertTrue(observed.wait(timeout=5))
+        with controller.lock:
+            controller.process = replacement
+            controller.state.update(status='ready', busy=False)
+        replaced.set()
+        thread.join(timeout=5)
+        self.assertFalse(thread.is_alive())
+        self.assertEqual(len(failures), 1)
+        self.assertIsInstance(failures[0], RuntimeError)
+        self.assertIn('already active', str(failures[0]))
+        self.assertIs(controller.process, replacement)
+        self.assertEqual(controller.snapshot()['status'], 'ready')
+        replacement.kill.assert_not_called()
+        replacement.wait.assert_not_called()
 
     def test_log_and_snapshots_are_bounded_independent_copies(self):
         controller = guest.GuestController(Path('.'))

@@ -86,8 +86,10 @@ class GuestController:
         return args
 
     def start(self):
-        if self.process is not None and self.process.poll() is not None:
-            self.stop()
+        with self.lock:
+            previous = self.process
+        if previous is not None and previous.poll() is not None:
+            self.stop(expected_process=previous)
         with self.lock:
             if self.closed:
                 raise RuntimeError('Guest controller is closed.')
@@ -223,10 +225,14 @@ class GuestController:
         with self.lock:
             if self.process is None or self.stopping:
                 return
-        self.stop(error=str(error))
+            previous = self.process
+        self.stop(error=str(error), expected_process=previous)
 
-    def stop(self, error=None):
+    def stop(self, error=None, expected_process=None):
         with self.lock:
+            # Cleanup from an older observer must never stop a replacement guest.
+            if expected_process is not None and self.process is not expected_process:
+                return
             if self.stopping:
                 return
             self.stopping = True
