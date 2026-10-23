@@ -1,6 +1,6 @@
 //! Polling PS/2 driver. IRQ1/IRQ12 remain masked, input work is finite per syscall.
 //! Controller command reference: https://intel.github.io/ecfw-zephyr/reference/kbchost/index.html
-use crate::device_model::{Keyboard, Mouse, command_ack};
+use crate::device_model::{InputQueue, Keyboard, Mouse, command_ack};
 use mnemosyne_abi::*;
 use spin::Mutex;
 use x86_64::instructions::port::Port;
@@ -9,11 +9,13 @@ struct Input {
     keyboard: Keyboard,
     mouse: Mouse,
     available: bool,
+    queue: InputQueue,
 }
 static INPUT: Mutex<Input> = Mutex::new(Input {
     keyboard: Keyboard::new(),
     mouse: Mouse::new(),
     available: false,
+    queue: InputQueue::new(),
 });
 const WAIT_LIMIT: usize = 100_000;
 
@@ -115,11 +117,15 @@ pub fn initialize() {
     );
 }
 
-pub fn poll() -> Result<Option<InputEvent>, ()> {
+/// Called from each PIT tick and bounded display-copy chunks, with CPU IRQs
+/// disabled. These sites never hold INPUT, so a timer cannot reenter this mutex.
+/// Drains a finite number of bytes even when userspace is painting or blocked.
+pub fn service() {
     let mut input = INPUT.lock();
     if !input.available {
-        return Err(());
+        return;
     }
+    let dropped = input.queue.dropped();
     for _ in 0..64 {
         let flags = status();
         if flags & 1 == 0 {
@@ -132,16 +138,28 @@ pub fn poll() -> Result<Option<InputEvent>, ()> {
         }
         if flags & 0x20 != 0 {
             if let Some(event) = input.mouse.feed(byte) {
-                return Ok(Some(event));
+                input.queue.push(event);
             }
         } else if let Some(code) = input.keyboard.feed(byte) {
-            return Ok(Some(InputEvent {
+            input.queue.push(InputEvent {
                 kind: INPUT_KEYBOARD,
                 code,
                 x: 0,
                 y: 0,
-            }));
+            });
         }
     }
-    Ok(None)
+    let total = input.queue.dropped();
+    if total != dropped && (dropped == 0 || total.is_power_of_two()) {
+        crate::serialln!("{{\"event\":\"input-overflow\",\"dropped\":{total}}}");
+    }
+}
+
+pub fn poll() -> Result<Option<InputEvent>, ()> {
+    service();
+    let mut input = INPUT.lock();
+    if !input.available {
+        return Err(());
+    }
+    Ok(input.queue.pop())
 }

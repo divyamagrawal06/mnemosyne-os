@@ -2,6 +2,75 @@
 //! No firmware code or external implementation is copied here.
 use mnemosyne_abi::*;
 
+pub const INPUT_QUEUE_CAPACITY: usize = 256;
+const EMPTY_EVENT: InputEvent = InputEvent {
+    kind: 0,
+    code: 0,
+    x: 0,
+    y: 0,
+};
+
+/// Fixed event ring. Adjacent motion with unchanged buttons coalesces. At full
+/// capacity discard the oldest keyboard event first, retaining the latest mouse
+/// button state even during a long keyboard-only flood. If all entries are mouse
+/// transitions, discard the oldest transition; the newest state remains queued.
+/// Keyboard releases update the decoder before enqueueing and never consume
+/// queue slots, so overflow cannot leave Shift/Caps in a stale decoder state.
+pub struct InputQueue {
+    events: [InputEvent; INPUT_QUEUE_CAPACITY],
+    head: usize,
+    len: usize,
+    dropped: u64,
+}
+impl InputQueue {
+    pub const fn new() -> Self {
+        Self {
+            events: [EMPTY_EVENT; INPUT_QUEUE_CAPACITY],
+            head: 0,
+            len: 0,
+            dropped: 0,
+        }
+    }
+    pub fn dropped(&self) -> u64 {
+        self.dropped
+    }
+    pub fn push(&mut self, event: InputEvent) {
+        if self.len != 0 && event.kind == INPUT_MOUSE {
+            let tail = (self.head + self.len - 1) % INPUT_QUEUE_CAPACITY;
+            let previous = &mut self.events[tail];
+            if previous.kind == INPUT_MOUSE && previous.code == event.code {
+                previous.x = previous.x.saturating_add(event.x).clamp(-32767, 32767);
+                previous.y = previous.y.saturating_add(event.y).clamp(-32767, 32767);
+                return;
+            }
+        }
+        if self.len == INPUT_QUEUE_CAPACITY {
+            let victim = (0..self.len)
+                .find(|index| {
+                    self.events[(self.head + index) % INPUT_QUEUE_CAPACITY].kind == INPUT_KEYBOARD
+                })
+                .unwrap_or(0);
+            for index in victim..self.len - 1 {
+                self.events[(self.head + index) % INPUT_QUEUE_CAPACITY] =
+                    self.events[(self.head + index + 1) % INPUT_QUEUE_CAPACITY];
+            }
+            self.len -= 1;
+            self.dropped = self.dropped.saturating_add(1);
+        }
+        self.events[(self.head + self.len) % INPUT_QUEUE_CAPACITY] = event;
+        self.len += 1;
+    }
+    pub fn pop(&mut self) -> Option<InputEvent> {
+        if self.len == 0 {
+            return None;
+        }
+        let event = self.events[self.head];
+        self.head = (self.head + 1) % INPUT_QUEUE_CAPACITY;
+        self.len -= 1;
+        Some(event)
+    }
+}
+
 /// Some(true/false) only for ACK/resend from the addressed PS/2 device.
 /// Unrelated input and corrupt/controller-empty bytes never complete a command.
 pub fn command_ack(status: u8, byte: u8, auxiliary: bool) -> Option<bool> {
@@ -188,6 +257,107 @@ impl Mouse {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn key(code: u32) -> InputEvent {
+        InputEvent {
+            kind: INPUT_KEYBOARD,
+            code,
+            x: 0,
+            y: 0,
+        }
+    }
+    fn mouse(buttons: u32, x: i32, y: i32) -> InputEvent {
+        InputEvent {
+            kind: INPUT_MOUSE,
+            code: buttons,
+            x,
+            y,
+        }
+    }
+    #[test]
+    fn queue_preserves_keyboard_order_across_delayed_consumer_and_wraparound() {
+        let mut queue = InputQueue::new();
+        for cycle in 0..10 {
+            for code in 0..200 {
+                queue.push(key(cycle * 200 + code));
+            }
+            for code in 0..200 {
+                assert_eq!(queue.pop().unwrap().code, cycle * 200 + code);
+            }
+            assert!(queue.pop().is_none());
+        }
+        assert_eq!(queue.dropped(), 0);
+    }
+    #[test]
+    fn queue_bounds_and_overflow_preserve_latest_mouse_release() {
+        let mut queue = InputQueue::new();
+        queue.push(mouse(1, 0, 0));
+        queue.push(mouse(0, 0, 0));
+        for code in 0..1024 {
+            queue.push(key(code));
+        }
+        assert_eq!(queue.len, INPUT_QUEUE_CAPACITY);
+        assert_eq!(queue.dropped(), 770);
+        assert_eq!(queue.pop().unwrap().code, 1);
+        let release = queue.pop().unwrap();
+        assert_eq!((release.kind, release.code), (INPUT_MOUSE, 0));
+        let mut last = 0;
+        while let Some(event) = queue.pop() {
+            last = event.code;
+        }
+        assert_eq!(last, 1023);
+        for buttons in 0..512 {
+            queue.push(mouse(buttons % 2, 0, 0));
+        }
+        assert_eq!(queue.len, INPUT_QUEUE_CAPACITY);
+        let mut last = EMPTY_EVENT;
+        while let Some(event) = queue.pop() {
+            last = event;
+        }
+        assert_eq!(last.code, 1);
+    }
+    #[test]
+    fn queue_coalesces_motion_without_merging_button_or_keyboard_boundaries() {
+        let mut queue = InputQueue::new();
+        for _ in 0..1000 {
+            queue.push(mouse(0, 2, -1));
+        }
+        assert_eq!(queue.len, 1);
+        queue.push(mouse(1, 0, 0));
+        queue.push(key(13));
+        queue.push(mouse(1, 1, 1));
+        queue.push(mouse(0, 0, 0));
+        let movement = queue.pop().unwrap();
+        assert_eq!((movement.x, movement.y), (2000, -1000));
+        assert_eq!(queue.pop().unwrap().code, 1);
+        assert_eq!(queue.pop().unwrap().kind, INPUT_KEYBOARD);
+        assert_eq!(queue.pop().unwrap().code, 1);
+        assert_eq!(queue.pop().unwrap().code, 0);
+        queue.push(mouse(0, i32::MAX, i32::MIN));
+        queue.push(mouse(0, i32::MAX, i32::MIN));
+        let movement = queue.pop().unwrap();
+        assert_eq!((movement.x, movement.y), (32767, -32767));
+        assert_eq!(queue.dropped(), 0);
+    }
+    #[test]
+    fn keyboard_release_state_survives_event_queue_overflow() {
+        let mut keyboard = Keyboard::new();
+        let mut queue = InputQueue::new();
+        keyboard.feed(0x2a); // Shift held while userspace is painting.
+        for _ in 0..512 {
+            if let Some(code) = keyboard.feed(0x1e) {
+                queue.push(key(code));
+            }
+            assert_eq!(keyboard.feed(0x9e), None);
+        }
+        assert_eq!(keyboard.feed(0xaa), None); // Release processed even when full.
+        queue.push(key(keyboard.feed(0x1e).unwrap()));
+        assert!(queue.dropped() > 0);
+        let mut final_key = 0;
+        while let Some(event) = queue.pop() {
+            final_key = event.code;
+        }
+        assert_eq!(final_key, b'a' as u32);
+    }
     #[test]
     fn command_ack_requires_clean_origin_and_reply() {
         assert_eq!(command_ack(0x21, 0xfa, true), Some(true));

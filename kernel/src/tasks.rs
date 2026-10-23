@@ -479,6 +479,10 @@ impl Kernel {
                             ERR_INVALID
                         } else {
                             crate::display::blit(x, y, w, h, |offset, bytes| {
+                                // The display keeps IRQs disabled. Drain hardware
+                                // every 256-pixel copy chunk, not only between
+                                // whole user frames, to avoid 8042 FIFO overrun.
+                                crate::input::service();
                                 memory.read(f.rdi + offset as u64, bytes, self.offset)
                             })
                         }
@@ -640,6 +644,7 @@ extern "C" fn task_trap(frame: &mut TrapFrame) -> *const TrapFrame {
         // Only the explicit idle loop enables interrupts in kernel mode. It
         // holds no scheduler/allocator locks and resumes after this tick.
         arch::timer_tick();
+        crate::input::service();
         return frame;
     }
     assert_eq!(frame.cs & 3, 3, "unexpected kernel trap: {frame:?}");
@@ -649,6 +654,7 @@ extern "C" fn task_trap(frame: &mut TrapFrame) -> *const TrapFrame {
     let schedule = match frame.vector {
         32 => {
             arch::timer_tick();
+            crate::input::service();
             k.tasks[current].preemptions += 1;
             true
         }
