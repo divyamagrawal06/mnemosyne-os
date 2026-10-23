@@ -127,13 +127,31 @@ def main():
             with socket.socket() as reservation:
                 reservation.bind(('127.0.0.1', 0))
                 port = reservation.getsockname()[1]
+            vnc = None
+            if boot == 1:
+                for display in range(1, 100):
+                    try:
+                        with socket.socket() as reservation:
+                            reservation.bind(('127.0.0.1', 5900 + display))
+                        vnc = f'127.0.0.1:{display}'
+                        break
+                    except OSError:
+                        continue
+                if vnc is None:
+                    raise RuntimeError('No unused loopback VNC display among 1..99')
             log = folder / f'boot-{boot}.log'
-            command = runner.qemu_command(args.image, disk, log, qmp=f'127.0.0.1:{port}', headless=True)
+            command = runner.qemu_command(args.image, disk, log, vnc=vnc, qmp=f'127.0.0.1:{port}', headless=True)
             error_log = (folder / f'qemu-{boot}.log').open('wb')
             process = subprocess.Popen(command, stdout=error_log, stderr=subprocess.STDOUT, start_new_session=True)
             try:
                 qmp = QMP(port, min(args.timeout, 30))
                 wait_for(log, 'native-desktop-ready', args.timeout)
+                if vnc:
+                    with socket.create_connection(('127.0.0.1', 5900 + int(vnc.rsplit(':', 1)[1])), timeout=5) as viewer:
+                        handshake = viewer.recv(12)
+                    if not handshake.startswith(b'RFB '):
+                        raise AssertionError('Loopback VNC did not return an RFB handshake')
+                    report['steps'].append({'loopback-vnc-handshake': handshake.decode('ascii').strip()})
                 time.sleep(.3)
                 first = qmp.screenshot(folder / f'boot-{boot}.ppm')
                 report['steps'].append({'boot': boot, 'framebuffer-sha256': first})
