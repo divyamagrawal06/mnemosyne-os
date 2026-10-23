@@ -144,7 +144,7 @@ pub fn launch(offset: u64, mut frames: BootFrames<'static>) -> ! {
             rdi: pid as u64,
             ..TrapFrame::default()
         };
-        let checkpoint = if pid == 4 {
+        let checkpoint = if pid == 3 || pid == 4 {
             Some(Checkpoint {
                 pages: memory.checkpoint(offset, &mut frames),
                 frame,
@@ -207,7 +207,7 @@ pub fn launch(offset: u64, mut frames: BootFrames<'static>) -> ! {
                     Rights::READ | Rights::WRITE | Rights::CONTROL,
                 )
                 .unwrap();
-            for pid in [2, 4] {
+            for pid in [2, 3, 4] {
                 task.caps
                     .mint_root(pid, ObjectKind::Process, Rights::CONTROL)
                     .unwrap();
@@ -270,7 +270,7 @@ impl Kernel {
         self.authority(ObjectKind::Process, pid, Rights::CONTROL)
     }
     fn restart(&mut self, pid: usize) -> i64 {
-        if pid != 2 && pid != 4 {
+        if !(2..=4).contains(&pid) {
             return ERR_INVALID;
         }
         if !self.control(pid as u64) {
@@ -562,6 +562,28 @@ impl Kernel {
                         });
                         0
                     }
+                }
+            }
+            SYS_TASK_STOP => {
+                if f.rdi == 1 {
+                    ERR_DENIED
+                } else if !(2..=TASK_COUNT as u64).contains(&f.rdi) {
+                    ERR_INVALID
+                } else if !self.control(f.rdi) {
+                    ERR_DENIED
+                } else if self.tasks[f.rdi as usize - 1].state == State::Dead {
+                    ERR_AGAIN
+                } else {
+                    let pid = f.rdi;
+                    self.tasks[pid as usize - 1].state = State::Dead;
+                    self.tasks[pid as usize - 1].mailbox.len = 0;
+                    for task in &mut self.tasks {
+                        task.mailbox.remove_sender(pid);
+                        task.caps.revoke_object(100 + pid);
+                    }
+                    // Saved send-cap entries deliberately remain stale until
+                    // restart rotates their generations and reissues policy.
+                    0
                 }
             }
             SYS_RESTART | SYS_RESTORE => self.restart(f.rdi as usize),

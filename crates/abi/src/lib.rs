@@ -25,6 +25,8 @@ pub const SYS_DISPLAY_INFO: u64 = 18;
 pub const SYS_DISPLAY_BLIT: u64 = 19;
 /// Init-only nonblocking PS/2 input; rdi points to writable InputEvent.
 pub const SYS_INPUT: u64 = 20;
+/// Init process-control authority; rdi selects worker PID 2..=4.
+pub const SYS_TASK_STOP: u64 = 21;
 pub const DISPLAY_MAX_BLIT_PIXELS: usize = 16_384;
 pub const INPUT_KEYBOARD: u32 = 1;
 pub const INPUT_MOUSE: u32 = 2;
@@ -67,6 +69,8 @@ pub struct InputEvent {
     pub x: i32,
     pub y: i32,
 }
+const _: () = assert!(core::mem::size_of::<DisplayInfo>() == 8);
+const _: () = assert!(core::mem::size_of::<InputEvent>() == 16);
 
 #[derive(Debug, Clone, Copy, Default)]
 #[repr(C)]
