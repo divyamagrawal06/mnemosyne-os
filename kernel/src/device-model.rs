@@ -2,6 +2,19 @@
 //! No firmware code or external implementation is copied here.
 use mnemosyne_abi::*;
 
+/// Some(true/false) only for ACK/resend from the addressed PS/2 device.
+/// Unrelated input and corrupt/controller-empty bytes never complete a command.
+pub fn command_ack(status: u8, byte: u8, auxiliary: bool) -> Option<bool> {
+    if status & 1 == 0 || status & 0xc0 != 0 || (status & 0x20 != 0) != auxiliary {
+        return None;
+    }
+    match byte {
+        0xfa => Some(true),
+        0xfe => Some(false),
+        _ => None,
+    }
+}
+
 pub fn rectangle_bytes(screen: DisplayInfo, x: u32, y: u32, w: u32, h: u32) -> Option<usize> {
     if w == 0 || h == 0 || x.checked_add(w)? > screen.width || y.checked_add(h)? > screen.height {
         return None;
@@ -175,6 +188,22 @@ impl Mouse {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn command_ack_requires_clean_origin_and_reply() {
+        assert_eq!(command_ack(0x21, 0xfa, true), Some(true));
+        assert_eq!(command_ack(0x01, 0xfa, false), Some(true));
+        assert_eq!(command_ack(0x21, 0xfe, true), Some(false));
+        for (status, byte, auxiliary) in [
+            (0x01, 0xfa, true),  // Keyboard ACK cannot enable the mouse.
+            (0x21, 0xfa, false), // Mouse ACK cannot enable the keyboard.
+            (0x21, 0x1e, true),  // Arbitrary input is not an ACK.
+            (0xa1, 0xfa, true),  // Parity error.
+            (0x61, 0xfa, true),  // Controller timeout.
+            (0x20, 0xfa, true),  // Output buffer empty.
+        ] {
+            assert_eq!(command_ack(status, byte, auxiliary), None);
+        }
+    }
     #[test]
     fn rectangles_reject_overflow_partial_and_unbounded_blits() {
         let screen = DisplayInfo {

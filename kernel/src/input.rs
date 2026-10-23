@@ -1,6 +1,6 @@
 //! Polling PS/2 driver. IRQ1/IRQ12 remain masked, input work is finite per syscall.
 //! Controller command reference: https://intel.github.io/ecfw-zephyr/reference/kbchost/index.html
-use crate::device_model::{Keyboard, Mouse};
+use crate::device_model::{Keyboard, Mouse, command_ack};
 use mnemosyne_abi::*;
 use spin::Mutex;
 use x86_64::instructions::port::Port;
@@ -64,7 +64,25 @@ fn response() -> Option<u8> {
     None
 }
 fn device(auxiliary: bool, value: u8) -> bool {
-    (!auxiliary || command(0xd4)) && data(value) && response() == Some(0xfa)
+    if (auxiliary && !command(0xd4)) || !data(value) {
+        return false;
+    }
+    // Keyboard and mouse share the controller output buffer. A key typed while
+    // booting must not be mistaken for the mouse command ACK. Discard unrelated
+    // boot input and accept only a parity-clean ACK from the addressed port.
+    // The outer bound also limits a continuous stream of unrelated key presses.
+    for _ in 0..WAIT_LIMIT {
+        let flags = status();
+        if flags & 1 == 0 {
+            core::hint::spin_loop();
+            continue;
+        }
+        let byte = read();
+        if let Some(accepted) = command_ack(flags, byte, auxiliary) {
+            return accepted;
+        }
+    }
+    false
 }
 
 pub fn initialize() {
