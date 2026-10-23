@@ -1,13 +1,44 @@
 # mnemosyne-os
 
-A bootable Rust research OS for capability-controlled services, deterministic
-replay and policy-checked recovery. It has its own kernel and interactive serial
-console. Run it inside QEMU locally, on Linux, or on a Raspberry Pi running
-64-bit Raspberry Pi OS. The Pi hosts x86-64 emulation, not a native ARM port.
+A bootable Rust operating-system prototype with its own graphical desktop,
+terminal, file editor and task manager. The guest kernel owns memory protection,
+preemptive scheduling, capabilities, IPC, framebuffer and keyboard/mouse drivers.
+The desktop is a ring-3 Rust application drawing pixels through checked kernel
+syscalls. It runs entirely inside MnemosyneOS.
 
-## Browser demo and Raspberry Pi
+## Native desktop
 
-The frontend now controls the **real running guest**: start/stop, serial commands,
+With the prebuilt native desktop bundle extracted:
+
+```sh
+python3 tools/run-desktop.py
+```
+
+This opens the actual guest screen in a QEMU window. Use **F1 Terminal**, **F2
+Files**, **F3 Tasks** and **F4 System**, or click with the mouse. Write and read a
+file, stop/start the CPU worker in Task manager, inspect preemption counters,
+and shut down from System. There is no browser or web server in this path.
+
+Build the native image from source with
+`python tools/dev.py desktop-image --release`. On Windows, the runner can use
+Ubuntu WSL/WSLg for QEMU. For EC2, run the guest in QEMU on a supported Linux host
+and view its framebuffer with a native VNC client through SSH:
+
+```sh
+python3 tools/run-desktop.py --vnc 127.0.0.1:1
+```
+
+Follow the [EC2 desktop guide](docs/ec2-desktop-demo.md) for the SSH tunnel,
+installation and a classroom walkthrough. EC2 hosts QEMU; direct import of this
+experimental kernel as an EC2 AMI is not supported by this implementation.
+
+The same x86-64 guest can run under TCG on a Pi with 64-bit Linux. Native ARM boot
+is not implemented. The current guest uses four compiled-in tasks and a flat
+filesystem; it is not a general-purpose desktop distribution.
+
+## Optional external dashboard
+
+The separate browser dashboard controls the **real running serial guest**: start/stop, serial commands,
 files, snapshot restore, tasks, fault injection, Wasm recovery, policy verification
 and repeated benchmark samples. It uses local Python and browser assets with no
 npm install or model credentials required.
@@ -82,6 +113,10 @@ needs no Linux kernel, network connection, browser, or AI model.
 | --- | --- |
 | `python tools/dev.py build` | Userspace ELF and freestanding kernel |
 | `python tools/dev.py os-image --release` | `build/mnemosyne-os-release.iso` |
+| `python tools/dev.py desktop-image --release` | Native desktop ISO with framebuffer and PS/2 input |
+| `python tools/run-desktop.py` | Actual guest graphical screen in QEMU |
+| `python tools/test-devices.py` | PS/2 decoder and framebuffer bounds regression tests |
+| `python3 tools/test-desktop.py` | Native QMP keyboard/mouse, screenshots and reboot acceptance (Linux) |
 | `python tools/dev.py run --release` | Interactive guest with persistent disk |
 | `python tools/dev.py guest-test --release` | Six-part demo plus reboot/recovery tests |
 | `python tools/dev.py boot` | Short kernel hardware checks, then exit |
@@ -95,7 +130,7 @@ needs no Linux kernel, network connection, browser, or AI model.
 ```text
 QEMU hardware: one x86-64 CPU, serial port, dedicated IDE disk
   Rust kernel: page tables, interrupts, scheduler, capabilities, IPC, drivers
-    ring 3: init-console + ChronicleFS + Wasmi + recovery verifier
+    ring 3: native desktop / console + ChronicleFS + Wasmi + recovery verifier
     ring 3: counter-service  [native COW/IPC replay]
     ring 3: cpu-hog          [non-yielding preemption probe]
     ring 3: fault-service    [CPU fault containment probe]

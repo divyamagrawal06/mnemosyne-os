@@ -8,8 +8,10 @@ live demo. It also identifies the unconfirmed completion percentage and team nam
 
 “MnemosyneOS is a small research operating system written in Rust. Its kernel
 isolates user tasks with virtual memory and capabilities, schedules them
-preemptively, and provides bounded IPC. It includes a persistent snapshotting
-filesystem and a WebAssembly runtime. My research focus is predictable service
+preemptively, and provides bounded IPC. It boots into its own graphical desktop,
+with a terminal, file editor and task manager. Keyboard and mouse input goes
+through its own drivers. It includes a persistent snapshotting filesystem and
+a WebAssembly runtime. My research focus is predictable service
 recovery: record inputs, restore a checkpoint, replay the inputs, and verify that
 state and outputs match. Recovery proposals must pass a deterministic policy
 verifier before execution.”
@@ -21,6 +23,8 @@ host Wasmi replay experiment. The browser dashboard was a host experiment viewer
 
 ## What now runs in the OS
 
+- A native framebuffer desktop, PS/2 keyboard/mouse, terminal, file editor and task manager.
+- Stop/start controls for the compiled-in worker services; init is protected.
 - Four ring-3 tasks, separate page tables, guarded stacks, and a 100-Hz scheduler.
 - A guest console that remains usable while a non-yielding task runs.
 - Capability IPC, rejected invalid pointers/handles, contained native CPU faults.
@@ -36,18 +40,20 @@ host Wasmi replay experiment. The browser dashboard was a host experiment viewer
 A bounded research prototype, not a Linux replacement. One x86-64 CPU, fixed task
 and Wasm workload sets, a flat filesystem with finite retained generations.
 Shell, filesystem, Wasmi and policy execution share trusted init; the counter
-and fault services are separately isolated. No networking, desktop, POSIX,
+and fault services are separately isolated. No networking, POSIX,
 arbitrary application loader, general driver stack or formal security proof.
 AI output is untrusted; offline tests do not establish live model reliability.
 Effects are compared in memory, so no exactly-once external delivery is claimed.
 
 ## What to show
 
-For the Pi presentation, use the [prebuilt deployment runbook](raspberry-pi-demo.md).
-Open the live workspace, choose **Start OS**, then **Experiments → Run demo**.
-The browser controls the actual guest serial console and displays its files,
-tasks, recovery events and benchmark samples. On the Pi, Linux hosts QEMU's x86
-emulator; this is not a native ARM port. See [current validation](end-to-end-status.md).
+Use the [native desktop runbook](ec2-desktop-demo.md). Run
+`python3 tools/run-desktop.py` locally, or view its screen through VNC over SSH
+on an EC2 Linux host. Show the booted desktop, write a file in Files, stop/start
+the CPU worker in Tasks, and run `ps` in Terminal. Those pixels are drawn inside
+MnemosyneOS. QEMU presents the hardware; the external web dashboard is optional.
+The desktop shares trusted init with filesystem and shell services; its views
+are not separate application processes. See [current validation](end-to-end-status.md).
 
 Boot QEMU and type `demo`, then `ps`, `ls`, and `snapshots`. Write a file, shut down,
 reboot and read it. Run `recover` and `kv-add 1 2` to show a recovered application

@@ -70,14 +70,30 @@ on the host, so use a trusted host/user account.
 On a local machine with QEMU graphical window support, run
 `python tools/run-desktop.py` without `--vnc` for a native window. Windows uses
 native QEMU when found on PATH, otherwise Ubuntu WSL; a WSL graphical window
-requires WSLg. VNC over loopback works without WSLg. A missing graphical
+requires WSLg. On Ubuntu/WSL, install the display backend with
+`sudo apt-get install --no-install-recommends qemu-system-gui` if QEMU lists only
+`none` and `curses` under `qemu-system-x86_64 -display help`.
+VNC over loopback works without WSLg. A missing graphical
 backend or DISPLAY is a host configuration issue, not evidence that the OS
 rendered successfully.
 
-Interact with the guest's desktop and terminal. Use guest `help` to see its
-implemented commands. Write/read a note, take a filesystem snapshot, edit and
-restore it, inspect tasks, run a bounded demo and inspect recovery. Shutdown
-from the guest before restarting and read the same note to check persistence.
+For a core-OS presentation:
+
+1. Boot to the native desktop and move the pointer. Use F1 through F4 or the
+   launcher to switch between Terminal, Files, Tasks and System.
+2. In Terminal, type `help`, `ps` and `uptime`. Explain that the shell calls the
+   custom kernel, and the task table reports its real scheduler counters.
+3. Open Tasks. Stop the CPU worker (PID 3), observe its stopped state, then Start
+   it. Init remains protected. These controls operate on the fixed native tasks;
+   they do not load arbitrary executables.
+4. In Files, type a short note and press Save file or Enter. Click its filename
+   to read the actual bytes from disk. The editor supports single-line ASCII up
+   to 420 bytes; larger/multiline files are read-only previews.
+5. In System, run the fault-isolation check. Task 4 faults while init and the
+   counter service continue. Return to Tasks and restart the fault service.
+6. Shut down through System, boot again and open the saved note. Replay and AI
+   experiments remain optional terminal commands; they are not needed here.
+
 Keyboard and pointer input are handled by the guest's PS/2 path. The system
 is a prototype desktop, not a Linux/X11/Wayland application environment.
 

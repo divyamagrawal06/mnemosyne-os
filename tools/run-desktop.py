@@ -38,7 +38,7 @@ def qemu_command(image, disk, log, vnc=None, qmp=None, headless=False):
         raise ValueError('--qmp must be a loopback TCP endpoint')
     if qmp and not 1 <= int(qmp.rsplit(':', 1)[1]) <= 65535:
         raise ValueError('QMP port must be 1..65535')
-    args = ['qemu-system-x86_64', '-machine', 'pc', '-accel', 'tcg,thread=single',
+    args = ['qemu-system-x86_64', '-name', 'MnemosyneOS', '-machine', 'pc', '-accel', 'tcg,thread=single',
             '-cpu', 'qemu64', '-m', '256M', '-smp', '1', '-vga', 'std',
             '-cdrom', str(image.resolve()), '-drive',
             f"file={str(disk.resolve()).replace(',', ',,')},format=raw,if=ide,index=0,cache=writethrough",

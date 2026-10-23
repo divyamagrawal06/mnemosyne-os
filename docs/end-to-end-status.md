@@ -1,10 +1,31 @@
 # Integrated demo status
 
-Updated 23 October 2026. The deliverable is a bootable research OS with a real
-browser control path and a prebuilt Raspberry Pi deployment bundle. It is not a
-general-purpose desktop OS or a native Raspberry Pi firmware image.
+Updated 23 October 2026. The primary interface is now a graphical desktop running
+inside the custom OS. It includes a terminal, Files editor, Task manager and
+System tools, with PS/2 keyboard and mouse input. A native QEMU window or VNC
+viewer shows the guest framebuffer. The older external browser controller is
+optional. This remains a bounded prototype, not a general-purpose distribution
+or a native Raspberry Pi firmware image.
 
 ## Executable path
+
+```text
+Native QEMU window / native VNC viewer (SSH tunnel on EC2)
+  QEMU VGA framebuffer + PS/2 devices
+    custom Rust kernel: checked display/input syscalls, device capabilities
+      ring-3 native desktop + shell: terminal, files, tasks, system tools
+        actual ChronicleFS state and kernel task counters
+```
+
+The pixels, layout, input handling and file/task actions execute inside the
+guest. The four desktop views share the existing trusted init process. They
+are not four newly isolated application processes or a general window server.
+The file editor supports single-line ASCII text up to 420 bytes; larger or
+multiline files are read-only previews. Process controls operate on the fixed
+worker set. The counter resumes from its quiescent checkpoint; CPU/fault workers
+restart from their initial saved context. Init cannot be stopped by these controls.
+
+The separately retained browser experiment path is:
 
 ```text
 Browser on Pi or laptop
@@ -41,12 +62,18 @@ The proposal's major mechanisms have an integrated demonstration. This does not
 establish general application support, formal verification, exhaustive security,
 or a measured benefit from an online AI model. The kernel still includes ATA,
 and filesystem/runtime management share trusted init. Arbitrary ELF admission,
-SMP, guest networking, POSIX, a guest graphical desktop and multi-service
+SMP, guest networking, POSIX, general desktop applications and multi-service
 consistent recovery remain outside this delivered prototype. There is no
 exactly-once external-effect protocol.
 
 ## Validation
 
+- Native QEMU acceptance passed real framebuffer rendering, PS/2 keyboard and
+  pointer navigation, worker stop/start, file-editor writes, display/input
+  invalid-pointer rejection, service fault containment and two clean boots with
+  file persistence. Screenshots come directly from the guest framebuffer.
+- Four pure device tests cover framebuffer rectangle overflow/bounds, keyboard
+  modifiers and prefixes, mouse overflow/resynchronization and PS/2 ACK origin.
 - 40 shared Rust tests and formatting/Clippy checks pass.
 - 14 dashboard HTTP tests, 6 controller boundary tests and 4 AI adapter tests pass.
   A concurrent-restart regression checks that stale cleanup cannot stop a new guest.
@@ -66,6 +93,8 @@ exactly-once external-effect protocol.
 Run these yourself:
 
 ```sh
+python tools/test-devices.py
+python3 tools/test-desktop.py --timeout 300
 python3 tools/guest-e2e.py --timeout 300
 python3 tools/dashboard.py --guest-timeout 300
 ```
@@ -97,5 +126,6 @@ available in this environment, so compatibility and speed must be rehearsed on
 the target device. A native Pi port would need ARM64 startup, exception handling,
 page tables, interrupt/timer support and Pi-specific drivers.
 
-Follow [the deployment and classroom runbook](raspberry-pi-demo.md). Keep the
-frontend on loopback and use the documented SSH tunnel for a laptop display.
+Follow the [native desktop/EC2 runbook](ec2-desktop-demo.md) to present the guest
+screen, or the [external controller runbook](raspberry-pi-demo.md) for browser
+experiments. Actual EC2 deployment and physical Pi execution remain untested.

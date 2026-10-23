@@ -1,6 +1,6 @@
 # Implementation status
 
-MnemosyneOS is a bootable, single-core x86-64 research OS. The guest console,
+MnemosyneOS is a bootable, single-core x86-64 research OS. The native desktop, guest console,
 filesystem and recovery demonstration run under its own kernel. Linux/Windows
 are development hosts; QEMU supplies virtual hardware.
 
@@ -10,21 +10,23 @@ are development hosts; QEMU supplies virtual hardware.
 | Memory | Frame allocation, kernel/user heaps, private page tables, RX code, RW/NX data, guarded stacks, checked buffers | Fixed boot-created address spaces; no swapping/general mmap |
 | Scheduling | Four ring-3 tasks, 100-Hz round robin, integer contexts, blocking receive, timed sleep, fault termination | One CPU; compiled-in roles; no arbitrary ELF admission |
 | Capabilities | Caller tables, typed rights, generation checks, bounded IPC, receive authority, device/process checks, endpoint revocation on restore | No cross-process delegation syscall or general object manager |
+| Native desktop | Limine RGB framebuffer, bounded blit syscall, polling PS/2 keyboard/mouse, ring-3 terminal/Files/Tasks/System, worker stop/start | Shared trusted init; fixed layouts; single-line ASCII editor up to 420 bytes; no independent GUI apps/window server |
 | Native recovery | Checkpoint at blocked receive, write protection, COW copying, register restore, stale endpoint rejection, IPC replay | One counter-service checkpoint; no multi-service consistent snapshot |
 | ChronicleFS | ATA PIO driver; userspace files, atomic batch commits, checksums, snapshots, restore, reboot mount | Flat names; 32 files; 192-KiB/file; 255.5-KiB/root; 64 generations on 16-MiB disk; no GC |
 | Wasm | Pinned no-std Wasmi in guest userspace; integer KV fixture; 10,000 fuel/request; 64-KiB memory | Fixed admitted module, no general WASI loader |
 | Replay | Durable checkpoint/input-log bundle; trap poisoning; fresh restore; state/effect equality; resumed live requests | Full-copy Wasm checkpoints; synthetic time/random; effects held in memory |
 | Policy | Typed JSON DSL, identity/authority/privilege/budget/rollback checks, execution-time revalidation | One action: restore-replay; tested deterministic verifier, no formal proof |
 | AI | Optional host OpenAI adapter, strict schema, bounded I/O, offline candidates, guest verification | Online mode needs user credentials/model; not exercised by offline tests |
-| Frontend | Live guest start/stop, serial console, files/snapshots/tasks, fault/replay/policy actions and evidence export | Host UI over loopback; remote access through SSH tunnel |
+| External dashboard | Optional live guest start/stop, serial console, files/snapshots/tasks and experiment evidence export | Separate host web UI; not needed for the native desktop |
+| EC2 display route | Native QEMU window or loopback VNC through SSH, prebuilt desktop bundle, QMP keyboard/mouse/screenshot acceptance | Linux host runs QEMU TCG; deployment to EC2 itself remains untested; no custom AMI import |
 | Evaluation | Failure tests, real HTTP/two-boot acceptance, task/COW counters, 35 guest benchmark samples across seven operations | Coarse QEMU/10-ms measurements, no hardware performance conclusions |
 | Pi deployment | Prebuilt package, integrity preflight, install/start scripts and optional user service | ARM64 Linux hosts x86-64 TCG; physical Pi testing and native ARM boot not completed |
 
 ## Trust boundary
 
 The kernel owns page tables, task contexts, endpoint queues, capability tables,
-serial and the small ATA driver. The privileged ring-3 init process contains the
-shell, filesystem, Wasmi embedding and policy executor. Counter, CPU-hog and fault
+serial, framebuffer, PS/2 and the small ATA driver. The privileged ring-3 init process contains the
+desktop, shell, filesystem, Wasmi embedding and policy executor. Counter, CPU-hog and fault
 services have separate address spaces. Further decomposition of filesystem and
 Wasm management into independently restartable processes remains future work.
 
@@ -54,7 +56,7 @@ filesystem generation. Recovery remains private until replay/equality succeed;
 the executor records its result before replacing the active worker. No external
 effects are delivered. Checksums detect corruption, not adversarial rewrites.
 
-There is no networking, guest desktop, POSIX compatibility, arbitrary application
+There is no networking, POSIX compatibility, arbitrary application
 loader, general driver stack, formal kernel proof, or exactly-once external output.
 
 ## Reproduce
@@ -63,6 +65,9 @@ loader, general driver stack, formal kernel proof, or exactly-once external outp
 python tools/dev.py test
 python tools/dev.py build
 python tools/dev.py check
+python tools/test-devices.py
+python tools/dev.py desktop-image --release
+python3 tools/test-desktop.py --timeout 300
 python tools/test-dashboard.py
 python tools/test-ai-plan.py
 python tools/test-guest-controller.py
@@ -82,7 +87,8 @@ bounded to 120 seconds, one CPU, 256 MiB, and no NIC. Cargo uses two jobs.
 
 The original presentation/host dashboard archive describes its earlier `44b739d`
 baseline. Use the [end-to-end status](end-to-end-status.md) and
-[Pi runbook](raspberry-pi-demo.md) for the current live frontend and deployment.
+[native desktop guide](ec2-desktop-demo.md) for the primary presentation path,
+or [Pi controller runbook](raspberry-pi-demo.md) for external browser experiments.
 
 The [recorded guest log](evidence/guest-demo.log),
 [reboot/rejection log](evidence/guest-reboot.log) and
