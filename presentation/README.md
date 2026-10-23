@@ -1,5 +1,10 @@
 # MnemosyneOS presentation package
 
+The current live demonstration boots into a native guest desktop. Follow the
+[desktop runbook](../docs/ec2-desktop-demo.md) for Terminal, Files, Tasks and System
+locally or through VNC on EC2. The decks below retain their stated earlier
+implementation baselines; the native desktop is a later increment.
+
 ## Review I: current integrated OS
 
 Use the [Review I PowerPoint](output/mnemosyne-os-review-one.pptx),

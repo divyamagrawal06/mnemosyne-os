@@ -2,7 +2,9 @@
 
 Current integrated OS demo: [cloud and guest runbook](../docs/cloud-demo.md). The original deck and saved browser evidence retain their earlier baseline.
 
-The current demo can use the local browser dashboard or PowerShell, a headless QEMU guest, and a host Wasmi experiment. It shows working code and real correctness checks. The kernel has no graphical desktop or interactive shell yet. Statistical benchmark tooling, ChronicleFS, isolated userspace services, and the AI recovery verifier are future milestones.
+For the current native OS demo, use [the desktop runbook](../docs/ec2-desktop-demo.md): boot with `python tools/run-desktop.py`, then show Terminal, Files, Tasks and System inside the guest. On EC2, use QEMU on Linux and a native VNC viewer through SSH.
+
+The rest of this guide is archived for the original proposal-stage pitch. Its baseline had no graphical desktop or interactive shell. ChronicleFS, isolated userspace services and the recovery verifier have since been implemented; consult [current status](../docs/end-to-end-status.md) rather than presenting the old scope as current.
 
 ## Browser demo route
 

@@ -72,8 +72,9 @@ exactly-once external-effect protocol.
   pointer navigation, worker stop/start, file-editor writes, display/input
   invalid-pointer rejection, service fault containment and two clean boots with
   file persistence. Screenshots come directly from the guest framebuffer.
-- Four pure device tests cover framebuffer rectangle overflow/bounds, keyboard
-  modifiers and prefixes, mouse overflow/resynchronization and PS/2 ACK origin.
+- Nine pure device tests cover framebuffer rectangle overflow/bounds, keyboard
+  modifiers and prefixes, mouse overflow/resynchronization, PS/2 ACK origin,
+  bounded input queues and direction changes at screen edges.
 - 40 shared Rust tests and formatting/Clippy checks pass.
 - 14 dashboard HTTP tests, 6 controller boundary tests and 4 AI adapter tests pass.
   A concurrent-restart regression checks that stale cleanup cannot stop a new guest.
