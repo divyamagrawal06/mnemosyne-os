@@ -78,6 +78,14 @@ class QMP:
                 {'type': 'btn', 'data': {'button': 'left', 'down': down}}]})
             time.sleep(.1)
 
+    def move_to(self, x, y):
+        for _ in range(20):
+            self.move(-100, -100)
+        while x or y:
+            dx, dy = min(x, 100), min(y, 100)
+            self.move(dx, dy)
+            x, y = x - dx, y - dy
+
     def close(self):
         self.stream.close()
         self.socket.close()
@@ -134,15 +142,19 @@ def main():
                     report['steps'].append({'mouse-movement-visible': True})
                     # PS/2 is relative. Clamp to the top-left then move to the
                     # native Tasks sidebar target; each delta fits one packet.
-                    for _ in range(20):
-                        qmp.move(-100, -100)
-                    qmp.move(100, 100)
-                    qmp.move(0, 100)
-                    qmp.move(0, 50)
+                    qmp.move_to(100, 250)
                     cursor = len(log.read_text(errors='replace'))
                     qmp.click()
                     wait_for(log, '"event":"desktop-view","view":"tasks"', args.timeout, after=cursor)
                     report['steps'].append({'ps2-click-opened-tasks': True})
+                    qmp.move_to(928, 340)
+                    for operation in ('stop', 'start'):
+                        cursor = len(log.read_text(errors='replace'))
+                        qmp.click()
+                        wait_for(log, 'task-' + operation + ': pid=3', args.timeout, after=cursor)
+                        time.sleep(.3)
+                        qmp.screenshot(folder / ('task-' + operation + '.ppm'))
+                        report['steps'].append({'native-task-control': operation, 'pid': 3, 'passed': True})
                     for function, name in [('f2', 'files'), ('f3', 'tasks'), ('f4', 'system'), ('f1', 'terminal')]:
                         qmp.key(function)
                         time.sleep(.3)
