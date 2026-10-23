@@ -238,6 +238,24 @@ def main():
                         terminal_command(qmp, log, 'cat ' + name, args.timeout, '\n' + payload + '\n')
                         report['steps'].append({'fast-typing-fidelity': True, 'payload-bytes': len(payload),
                                                 'payload-sha256': hashlib.sha256(payload.encode()).hexdigest(), **timing})
+                    # The preceding cat loads all 430 bytes into the desktop
+                    # model. The 420-byte editor must remain a read-only preview.
+                    cursor = len(log.read_text(errors='replace'))
+                    qmp.key('f2')
+                    wait_for(log, '"event":"desktop-view","view":"files"', args.timeout, after=cursor)
+                    time.sleep(.3)
+                    cursor = len(log.read_text(errors='replace'))
+                    qmp.key('ret')
+                    time.sleep(1)
+                    attempted_save = log.read_text(errors='replace')[cursor:]
+                    if any(marker in attempted_save for marker in ('mnemosyne-os> write ', 'native-command-complete', 'desktop-file-save')):
+                        raise AssertionError(f'Read-only preview dispatched a save command: {attempted_save!r}')
+                    qmp.screenshot(folder / 'read-only-preview.ppm')
+                    cursor = len(log.read_text(errors='replace'))
+                    qmp.key('f1')
+                    wait_for(log, '"event":"desktop-view","view":"terminal"', args.timeout, after=cursor)
+                    terminal_command(qmp, log, 'cat fast-50.txt', args.timeout, '\n' + payload + '\n')
+                    report['steps'].append({'read-only-preview-save-rejected': True, 'unchanged-payload-bytes': len(payload)})
                     terminal_command(qmp, log, 'write desktop-proof.txt survived-reboot', args.timeout, 'committed generation=')
                 terminal_command(qmp, log, 'cat desktop-proof.txt', args.timeout, '\nsurvived-reboot\n')
                 time.sleep(1)
