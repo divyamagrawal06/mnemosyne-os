@@ -7,7 +7,11 @@ extern crate alloc;
 
 mod arch;
 mod ata;
+#[path = "device-model.rs"]
+mod device_model;
+mod display;
 mod heap;
+mod input;
 mod memory;
 mod paging;
 mod serial;
@@ -33,6 +37,10 @@ static MEMORY: MemoryMapRequest = MemoryMapRequest::new();
 #[used]
 #[unsafe(link_section = ".requests")]
 static HHDM: HhdmRequest = HhdmRequest::new();
+#[used]
+#[unsafe(link_section = ".requests")]
+static FRAMEBUFFER: limine::request::FramebufferRequest =
+    limine::request::FramebufferRequest::new();
 #[used]
 #[unsafe(link_section = ".requests_end_marker")]
 static END: RequestsEndMarker = RequestsEndMarker::new();
@@ -88,6 +96,15 @@ extern "C" fn kmain() -> ! {
     serialln!("{{\"event\":\"timer_ok\",\"ticks\":{ticks}}}");
     serialln!("{{\"event\":\"boot_ok\"}}");
     if shell_mode() {
+        if desktop_mode() {
+            if let Some(framebuffer) = FRAMEBUFFER
+                .get_response()
+                .and_then(|response| response.framebuffers().next())
+            {
+                display::initialize(&framebuffer);
+            }
+            input::initialize();
+        }
         tasks::launch(offset, frames);
     }
     exit_qemu(0x10)
@@ -96,7 +113,13 @@ extern "C" fn kmain() -> ! {
 fn shell_mode() -> bool {
     EXECUTABLE
         .get_response()
-        .is_some_and(|r| r.file().string().to_bytes() == b"shell")
+        .is_some_and(|r| matches!(r.file().string().to_bytes(), b"shell" | b"desktop"))
+}
+
+fn desktop_mode() -> bool {
+    EXECUTABLE
+        .get_response()
+        .is_some_and(|r| r.file().string().to_bytes() == b"desktop")
 }
 
 #[used]

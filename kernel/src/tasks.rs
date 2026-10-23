@@ -195,6 +195,12 @@ pub fn launch(offset: u64, mut frames: BootFrames<'static>) -> ! {
         }
         if index == 0 {
             task.caps
+                .mint_root(3, ObjectKind::Device, Rights::READ | Rights::WRITE)
+                .unwrap();
+            task.caps
+                .mint_root(4, ObjectKind::Device, Rights::READ)
+                .unwrap();
+            task.caps
                 .mint_root(
                     2,
                     ObjectKind::Device,
@@ -447,6 +453,64 @@ impl Kernel {
                         )
                     };
                     self.write_user(f.rdi, bytes)
+                }
+            }
+            SYS_DISPLAY_INFO => {
+                if !self.authority(ObjectKind::Device, 3, Rights::READ) {
+                    ERR_DENIED
+                } else if let Some(info) = crate::display::info() {
+                    let mut bytes = [0u8; 8];
+                    bytes[..4].copy_from_slice(&info.width.to_le_bytes());
+                    bytes[4..].copy_from_slice(&info.height.to_le_bytes());
+                    self.write_user(f.rdi, &bytes)
+                } else {
+                    ERR_AGAIN // Serial boot or no supported framebuffer.
+                }
+            }
+            SYS_DISPLAY_BLIT => {
+                if !self.authority(ObjectKind::Device, 3, Rights::WRITE) {
+                    ERR_DENIED
+                } else if let Some(info) = crate::display::info() {
+                    let (x, y) = ((f.rsi >> 32) as u32, f.rsi as u32);
+                    let (w, h) = ((f.rdx >> 32) as u32, f.rdx as u32);
+                    if let Some(bytes) = crate::device_model::rectangle_bytes(info, x, y, w, h) {
+                        let memory = &self.tasks[self.current].memory;
+                        if f.r10 != 0 || !memory.valid(f.rdi, bytes, false) {
+                            ERR_INVALID
+                        } else {
+                            crate::display::blit(x, y, w, h, |offset, bytes| {
+                                memory.read(f.rdi + offset as u64, bytes, self.offset)
+                            })
+                        }
+                    } else {
+                        ERR_INVALID
+                    }
+                } else {
+                    ERR_AGAIN
+                }
+            }
+            SYS_INPUT => {
+                if !self.authority(ObjectKind::Device, 4, Rights::READ) {
+                    ERR_DENIED
+                } else if !self.tasks[self.current].memory.valid(
+                    f.rdi,
+                    size_of::<InputEvent>(),
+                    true,
+                ) {
+                    ERR_INVALID
+                } else {
+                    match crate::input::poll() {
+                        Ok(Some(event)) => {
+                            let mut bytes = [0u8; 16];
+                            bytes[..4].copy_from_slice(&event.kind.to_le_bytes());
+                            bytes[4..8].copy_from_slice(&event.code.to_le_bytes());
+                            bytes[8..12].copy_from_slice(&event.x.to_le_bytes());
+                            bytes[12..].copy_from_slice(&event.y.to_le_bytes());
+                            self.write_user(f.rdi, &bytes)
+                        }
+                        Ok(None) => ERR_AGAIN,
+                        Err(()) => ERR_IO,
+                    }
                 }
             }
             SYS_DISK_READ | SYS_DISK_WRITE | SYS_DISK_FLUSH => {
