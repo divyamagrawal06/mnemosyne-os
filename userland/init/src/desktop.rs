@@ -67,6 +67,7 @@ pub struct Desktop {
     last_command: String,
     file_focus: usize,
     selected_file: Option<usize>,
+    file_page: usize,
     status: String,
 }
 
@@ -114,6 +115,7 @@ impl Desktop {
             last_command: String::new(),
             file_focus: 1,
             selected_file: None,
+            file_page: 0,
             status: "Ready. F1 Terminal   F2 Files   F3 Tasks   F4 System".to_string(),
         })
     }
@@ -153,6 +155,7 @@ impl Desktop {
             self.dirty = true;
         }
         self.files = files;
+        self.file_page = self.file_page.min(self.file_page_count() - 1);
         self.tasks = tasks;
         self.ticks = uptime_ticks;
         if self.selected_file.is_some_and(|i| i >= self.files.len()) {
@@ -290,6 +293,12 @@ impl Desktop {
             w: r.w - 180,
             h: r.h - 80,
         }
+    }
+    fn file_page_size(&self) -> usize {
+        (self.content().h - 90) / 31
+    }
+    fn file_page_count(&self) -> usize {
+        self.files.len().div_ceil(self.file_page_size()).max(1)
     }
     fn select(&mut self, view: View) {
         self.view = view;
@@ -473,7 +482,13 @@ impl Desktop {
         let c = self.content();
         if self.view == View::Files {
             let list_w = 180;
-            for i in 0..self.files.len().min((c.h - 90) / 31) {
+            let page_start = self.file_page * self.file_page_size();
+            let visible_files = self
+                .files
+                .len()
+                .saturating_sub(page_start)
+                .min(self.file_page_size());
+            for i in 0..visible_files {
                 if (Rect {
                     x: c.x,
                     y: c.y + 58 + i * 31,
@@ -482,8 +497,8 @@ impl Desktop {
                 })
                 .contains(x, y)
                 {
-                    self.selected_file = Some(i);
-                    self.file_name = self.files[i].0.clone();
+                    self.selected_file = Some(page_start + i);
+                    self.file_name = self.files[page_start + i].0.clone();
                     self.file_contents.clear();
                     self.file_read_only = true;
                     self.file_focus = 1;
@@ -494,6 +509,28 @@ impl Desktop {
                     );
                     return Some(format!("cat {}", self.file_name));
                 }
+            }
+            if (Rect {
+                x: c.x,
+                y: c.y + c.h - 32,
+                w: 64,
+                h: 28,
+            })
+            .contains(x, y)
+            {
+                self.file_page = self.file_page.saturating_sub(1);
+                return None;
+            }
+            if (Rect {
+                x: c.x + 118,
+                y: c.y + c.h - 32,
+                w: 62,
+                h: 28,
+            })
+            .contains(x, y)
+            {
+                self.file_page = (self.file_page + 1).min(self.file_page_count() - 1);
+                return None;
             }
             let ex = c.x + 200;
             if (Rect {
@@ -925,9 +962,16 @@ impl Desktop {
             LINE,
         );
         let files = self.files.clone();
-        for (i, (name, bytes)) in files.iter().take((c.h - 90) / 31).enumerate() {
+        let page_start = self.file_page * self.file_page_size();
+        for (global_index, (name, bytes)) in files
+            .iter()
+            .enumerate()
+            .skip(page_start)
+            .take(self.file_page_size())
+        {
+            let i = global_index - page_start;
             let y = c.y + 58 + i * 31;
-            if self.selected_file == Some(i) {
+            if self.selected_file == Some(global_index) {
                 self.rect(
                     Rect {
                         x: c.x,
@@ -944,6 +988,34 @@ impl Desktop {
         if files.is_empty() {
             self.text(c.x + 6, c.y + 70, "No guest files yet", MUTED, 1, 20);
         }
+        self.button(
+            Rect {
+                x: c.x,
+                y: c.y + c.h - 32,
+                w: 64,
+                h: 28,
+            },
+            "Prev",
+            false,
+        );
+        self.text(
+            c.x + 73,
+            c.y + c.h - 22,
+            &format!("{}/{}", self.file_page + 1, self.file_page_count()),
+            MUTED,
+            1,
+            5,
+        );
+        self.button(
+            Rect {
+                x: c.x + 118,
+                y: c.y + c.h - 32,
+                w: 62,
+                h: 28,
+            },
+            "Next",
+            false,
+        );
         let ex = c.x + 200;
         let ew = c.w - 200;
         self.text(ex, c.y + 43, "Filename", MUTED, 1, 20);
