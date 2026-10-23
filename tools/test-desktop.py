@@ -66,6 +66,18 @@ class QMP:
             raise AssertionError('Framebuffer screenshot is missing or has insufficient pixel variation')
         return hashlib.sha256(data).hexdigest()
 
+    def move(self, x, y):
+        self.execute('input-send-event', {'events': [
+            {'type': 'rel', 'data': {'axis': 'x', 'value': x}},
+            {'type': 'rel', 'data': {'axis': 'y', 'value': y}}]})
+        time.sleep(.05)
+
+    def click(self):
+        for down in (True, False):
+            self.execute('input-send-event', {'events': [
+                {'type': 'btn', 'data': {'button': 'left', 'down': down}}]})
+            time.sleep(.1)
+
     def close(self):
         self.stream.close()
         self.socket.close()
@@ -109,20 +121,46 @@ def main():
             process = subprocess.Popen(command, stdout=error_log, stderr=subprocess.STDOUT, start_new_session=True)
             try:
                 qmp = QMP(port, min(args.timeout, 30))
-                wait_for(log, 'desktop-ready', args.timeout)
+                wait_for(log, 'native-desktop-ready', args.timeout)
+                time.sleep(.3)
                 first = qmp.screenshot(folder / f'boot-{boot}.ppm')
                 report['steps'].append({'boot': boot, 'framebuffer-sha256': first})
                 if boot == 1:
-                    qmp.execute('input-send-event', {'events': [
-                        {'type': 'rel', 'data': {'axis': 'x', 'value': 40}},
-                        {'type': 'rel', 'data': {'axis': 'y', 'value': 30}}]})
+                    qmp.move(40, 30)
                     time.sleep(.5)
                     second = qmp.screenshot(folder / 'pointer-moved.ppm')
                     if first == second:
                         raise AssertionError('PS/2 mouse movement did not change the framebuffer')
                     report['steps'].append({'mouse-movement-visible': True})
+                    # PS/2 is relative. Clamp to the top-left then move to the
+                    # native Tasks sidebar target; each delta fits one packet.
+                    for _ in range(20):
+                        qmp.move(-100, -100)
+                    qmp.move(100, 100)
+                    qmp.move(0, 100)
+                    qmp.move(0, 50)
+                    cursor = len(log.read_text(errors='replace'))
+                    qmp.click()
+                    wait_for(log, '"event":"desktop-view","view":"tasks"', args.timeout, after=cursor)
+                    report['steps'].append({'ps2-click-opened-tasks': True})
+                    for function, name in [('f2', 'files'), ('f3', 'tasks'), ('f4', 'system'), ('f1', 'terminal')]:
+                        qmp.key(function)
+                        time.sleep(.3)
+                        qmp.screenshot(folder / (name + '.ppm'))
+                    qmp.key('f2')
+                    cursor = len(log.read_text(errors='replace'))
+                    qmp.text('desktop UI test')
+                    wait_for(log, '"event":"desktop-file-save"', args.timeout, after=cursor)
+                    qmp.screenshot(folder / 'native-file-editor.ppm')
+                    report['steps'].append({'native-file-editor-save': True})
+                    qmp.key('f1')
+                    for operation, event in [('cap-demo', 'capability-demo'), ('fault-demo', 'fault-demo')]:
+                        cursor = len(log.read_text(errors='replace'))
+                        qmp.text(operation)
+                        wait_for(log, '"event":"' + event + '","passed":true', args.timeout, after=cursor)
+                        report['steps'].append({'guest-command': operation, 'passed': True})
                     qmp.text('write desktop-proof.txt survived-reboot')
-                    wait_for(log, 'generation=', args.timeout)
+                    wait_for(log, 'committed generation=', args.timeout)
                 before = len(log.read_text(errors='replace'))
                 qmp.text('cat desktop-proof.txt')
                 wait_for(log, 'survived-reboot', args.timeout, after=before)
@@ -147,6 +185,9 @@ def main():
                 error_log.close()
                 process = None
         report['passed'] = True
+    except Exception as error:
+        report['error'] = str(error)
+        raise
     finally:
         report['finished-at'] = datetime.now(timezone.utc).isoformat()
         (folder / 'acceptance.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
