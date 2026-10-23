@@ -981,7 +981,7 @@ impl Desktop {
             false,
         );
         self.text(c.x, c.y + 43, "Live process activity", MUTED, 1, 50);
-        let columns = [0, 52, 174, 280, 385, 480];
+        let columns = [0, 55, 245, 360, 475, 590];
         for (offset, label) in columns.iter().zip([
             "PID",
             "Role / state",
