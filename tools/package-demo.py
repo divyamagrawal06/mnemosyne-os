@@ -39,8 +39,9 @@ def main():
         for path in (dev.ROOT / directory).rglob("*"):
             if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc":
                 files[path.relative_to(dev.ROOT).as_posix()] = path
-    for path in (dev.ROOT / "docs/evidence").glob("*"):
-        files["docs/evidence/" + path.name] = path
+    if not args.desktop:
+        for path in (dev.ROOT / "docs/evidence").glob("*"):
+            files["docs/evidence/" + path.name] = path
     for path in (dev.ROOT / "third-party/licenses").glob("*"):
         files["licenses/project/" + path.name] = path
     metadata = json.loads(subprocess.check_output(["cargo", "metadata", "--locked", "--format-version", "1"], cwd=dev.ROOT))
