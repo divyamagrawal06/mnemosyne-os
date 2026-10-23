@@ -75,6 +75,9 @@ pub fn run() -> ! {
         );
     }
     println!("Type help for commands, demo for the full demonstration, shutdown to exit.");
+    if let Some(desktop) = crate::desktop::Desktop::new() {
+        shell.run_desktop(desktop);
+    }
     loop {
         let _ = write!(Console, "mnemosyne-os> ");
         let line = crate::read_line();
@@ -85,6 +88,72 @@ pub fn run() -> ! {
 }
 
 impl Shell {
+    fn desktop_model(&self, desktop: &mut crate::desktop::Desktop) {
+        let files = self
+            .fs
+            .as_ref()
+            .map(|fs| {
+                fs.files()
+                    .map(|(name, size)| (name.to_string(), size))
+                    .collect()
+            })
+            .unwrap_or_default();
+        desktop.update_model(files, sys::stats(), sys::ticks());
+    }
+
+    fn run_desktop(&mut self, mut desktop: crate::desktop::Desktop) -> ! {
+        // First-boot content lives on the actual guest disk, not in a UI fixture.
+        if let Some(fs) = &mut self.fs
+            && fs.generation() == 1
+            && fs.files().next().is_none()
+        {
+            let _ = fs.write("welcome.txt", b"Welcome to MnemosyneOS. This file lives on your guest disk. Edit it in Files or use: write note.txt hello");
+        }
+        self.desktop_model(&mut desktop);
+        desktop.present();
+        println!("{{\"event\":\"native-desktop-ready\"}}");
+        let mut refreshed = sys::ticks();
+        loop {
+            if let Some(line) = desktop.poll() {
+                let command = line.trim();
+                if !command.is_empty() {
+                    // This echo and every command result also appear on serial,
+                    // allowing independent QMP/keyboard integration tests.
+                    println!("mnemosyne-os> {command}");
+                    desktop.present();
+                    crate::begin_capture();
+                    let result = self.command(command);
+                    if let Err(error) = &result {
+                        println!("error: {error}");
+                    }
+                    let output = crate::end_capture();
+                    desktop.write_console(&output);
+                    desktop.command_complete(result.is_ok(), &output);
+                    if result.is_ok()
+                        && let Some(name) = command.strip_prefix("cat ")
+                        && let Some(fs) = &self.fs
+                        && let Ok(bytes) = fs.read(name.trim())
+                        && let Ok(contents) = core::str::from_utf8(bytes)
+                    {
+                        desktop.set_file_contents(name.trim(), contents);
+                    }
+                    self.desktop_model(&mut desktop);
+                    desktop.present();
+                    println!(
+                        "{{\"event\":\"native-command-complete\",\"ok\":{}}}",
+                        result.is_ok()
+                    );
+                    refreshed = sys::ticks();
+                }
+            }
+            if sys::ticks().saturating_sub(refreshed) >= 100 {
+                self.desktop_model(&mut desktop);
+                refreshed = sys::ticks();
+            }
+            sys::sleep(1);
+        }
+    }
+
     fn fs(&mut self) -> Result<&mut FileSystem<Disk>> {
         self.fs
             .as_mut()
@@ -95,7 +164,7 @@ impl Shell {
         match words.next().unwrap_or("") {
             "" => (),
             "help" => {
-                println!("system: help, about, ps, uptime, shutdown");
+                println!("system: help, about, ps, uptime, stop <pid>, start <pid>, shutdown");
                 println!("files:  ls, cat <name>, write <name> <text>, rm <name>, fs-info");
                 println!("        snapshot <label>, snapshots, restore <generation>");
                 println!(
@@ -124,6 +193,25 @@ impl Shell {
                 );
             }
             "uptime" => println!("uptime-ticks={} tick-ms=10", sys::ticks()),
+            "stop" | "start" => {
+                let operation = command.split_whitespace().next().unwrap();
+                let pid = number(words.next())?;
+                require(
+                    (2..=4).contains(&pid),
+                    "only service PIDs 2..4 may be controlled; init is protected",
+                )?;
+                require(words.next().is_none(), "provide one service PID")?;
+                let syscall = if operation == "stop" {
+                    SYS_TASK_STOP
+                } else {
+                    SYS_RESTART
+                };
+                require(
+                    sys::call(syscall, pid, 0, 0, 0).0 == 0,
+                    "service operation failed",
+                )?;
+                println!("task-{operation}: pid={pid}");
+            }
             "ps" => {
                 println!("pid  service          state       switches  preemptions  faults  epoch");
                 for task in sys::stats() {
@@ -500,7 +588,36 @@ fn cap_demo() -> Result<()> {
         sys::call(SYS_WRITE, 0xffffffff80000000, 8, 0, 0).0 == ERR_INVALID,
         "kernel pointer accepted",
     )?;
-    println!("{{\"event\":\"capability-demo\",\"passed\":true,\"rejections\":5}}");
+    let mut rejections = 5;
+    let mut display = DisplayInfo::default();
+    if sys::call(SYS_DISPLAY_INFO, &mut display as *mut _ as u64, 0, 0, 0).0 == 0 {
+        require(
+            sys::call(SYS_DISPLAY_INFO, 0, 0, 0, 0).0 == ERR_INVALID,
+            "null display-info output accepted",
+        )?;
+        require(
+            sys::call(SYS_INPUT, 0, 0, 0, 0).0 == ERR_INVALID,
+            "null input output accepted",
+        )?;
+        let pixel = 0u32;
+        let one = (1u64 << 32) | 1;
+        require(
+            sys::call(SYS_DISPLAY_BLIT, 0, 0, one, 0).0 == ERR_INVALID,
+            "null blit input accepted",
+        )?;
+        for (xy, wh) in [
+            (((display.width - 1) as u64) << 32, (2u64 << 32) | 1),
+            (u64::MAX, one),
+            (0, (1024u64 << 32) | 17),
+        ] {
+            require(
+                sys::call(SYS_DISPLAY_BLIT, &pixel as *const _ as u64, xy, wh, 0).0 == ERR_INVALID,
+                "invalid display rectangle accepted",
+            )?;
+        }
+        rejections += 6;
+    }
+    println!("{{\"event\":\"capability-demo\",\"passed\":true,\"rejections\":{rejections}}}");
     Ok(())
 }
 fn fault_demo() -> Result<()> {

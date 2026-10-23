@@ -77,6 +77,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
+name = "font8x8"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "875488b8711a968268c7cf5d139578713097ca4635a76044e8fe8eedf831d07e"
+
+[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -222,12 +228,14 @@ dependencies = [
 name = "mnemosyne-user-init"
 version = "0.1.0"
 dependencies = [
+ "font8x8",
  "linked_list_allocator",
  "mnemosyne-abi",
  "mnemosyne-chronicle-fs",
  "mnemosyne-recovery-policy",
  "mnemosyne-service-runtime",
  "serde_json",
+ "spin 0.12.3",
 ]
 
 [[package]]

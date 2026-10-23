@@ -26,6 +26,7 @@ The ignored `.tools` directory is a build cache. The runner verifies the bootloa
 | sha2 | 0.10.9 | [RustCrypto/hashes](https://github.com/RustCrypto/hashes) | MIT OR Apache-2.0 | Module and checkpoint integrity digests |
 | serde | 1.0.228 | [serde-rs/serde](https://github.com/serde-rs/serde) | MIT OR Apache-2.0 | Structured experiment output |
 | serde_json | 1.0.151 | [serde-rs/json](https://github.com/serde-rs/json) | MIT OR Apache-2.0 | JSON report encoding |
+| font8x8 | 0.3.1 | [font8x8-rs](https://gitlab.com/saibatizoku/font8x8-rs) | MIT; underlying VGA bitmap glyphs public domain | Unmodified bitmap font data and lookup API used by the native guest desktop, with `std` disabled |
 
 The source research cache is not incorporated into the implementation. Research references such as seL4, Theseus, RedLeaf, Golem, and AgentSpec are not vendored dependencies. Reuse decisions are made per component; a public repository is not automatically permission to redistribute its code under MIT.
 

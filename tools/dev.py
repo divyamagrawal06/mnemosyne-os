@@ -79,10 +79,10 @@ def bootloader():
     run(linux_command(["make", "-C", linux_path(LIMINE), "-j2"]))
 
 
-def image(release=False, shell=False):
+def image(release=False, shell=False, desktop=False):
     build(release)
     bootloader()
-    suffix = ("-os" if shell else "") + ("-release" if release else "")
+    suffix = ("-desktop" if desktop else "-os" if shell else "") + ("-release" if release else "")
     profile = "release" if release else "debug"
     stage = BUILD / ("iso-root" + suffix)
     boot = stage / "boot"
@@ -92,7 +92,9 @@ def image(release=False, shell=False):
         folder.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(ROOT / "target" / TARGET / profile / "mnemosyne-kernel", boot / "mnemosyne-kernel")
     config = (ROOT / "boot" / "limine.conf").read_text()
-    if shell:
+    if desktop:
+        config = config.replace("MnemosyneOS smoke test", "MnemosyneOS desktop") + "    cmdline: desktop\n    resolution: 1024x768x32\n"
+    elif shell:
         config = config.replace("MnemosyneOS smoke test", "mnemosyne-os") + "    cmdline: shell\n"
     (boot / "limine.conf").write_text(config)
     for name in ("limine-bios.sys", "limine-bios-cd.bin", "limine-uefi-cd.bin", "LICENSE"):
@@ -108,7 +110,7 @@ def image(release=False, shell=False):
         "source-commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "source-dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip()),
         "sha256": hashlib.sha256(iso.read_bytes()).hexdigest(),
-        "profile": profile, "guest-shell": shell,
+        "profile": profile, "guest-shell": shell or desktop, "guest-desktop": desktop,
     }
     iso.with_suffix(".json").write_text(json.dumps(provenance, indent=2) + "\n", encoding="utf-8")
     return iso
@@ -278,11 +280,12 @@ def demo():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["build", "image", "os-image", "run", "guest-test", "boot", "test", "check", "demo"])
+    parser.add_argument("command", choices=["build", "image", "os-image", "desktop-image", "run", "guest-test", "boot", "test", "check", "demo"])
     parser.add_argument("--release", action="store_true", help="optimized kernel build/image/boot")
     args = parser.parse_args()
     kernel_commands = {"build": build, "image": image, "boot": smoke, "run": run_os,
-                       "os-image": lambda release: image(release, shell=True), "guest-test": guest_test}
+                       "os-image": lambda release: image(release, shell=True),
+                       "desktop-image": lambda release: image(release, desktop=True), "guest-test": guest_test}
     if args.command in kernel_commands:
         kernel_commands[args.command](release=args.release)
     else:

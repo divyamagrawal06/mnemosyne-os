@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 extern crate alloc;
+mod desktop;
 mod shell;
 mod sys;
 use core::fmt::Write;
@@ -8,9 +9,27 @@ use linked_list_allocator::LockedHeap;
 use mnemosyne_abi::*;
 #[global_allocator]
 static HEAP: LockedHeap = LockedHeap::empty();
+// Each process has its own address space. Only init enables capture while it
+// executes a desktop command; the serial console remains available for diagnosis.
+static CAPTURE: spin::Mutex<Option<alloc::string::String>> = spin::Mutex::new(None);
+pub(crate) fn begin_capture() {
+    *CAPTURE.lock() = Some(alloc::string::String::new());
+}
+pub(crate) fn end_capture() -> alloc::string::String {
+    CAPTURE.lock().take().unwrap_or_default()
+}
 struct Console;
 impl Write for Console {
     fn write_str(&mut self, mut text: &str) -> core::fmt::Result {
+        if let Some(mut capture) = CAPTURE.try_lock()
+            && let Some(output) = capture.as_mut()
+        {
+            let mut n = text.len().min(65536usize.saturating_sub(output.len()));
+            while !text.is_char_boundary(n) {
+                n -= 1;
+            }
+            output.push_str(&text[..n]);
+        }
         while !text.is_empty() {
             let mut n = text.len().min(4096);
             while !text.is_char_boundary(n) {
@@ -60,6 +79,9 @@ fn echo_service() -> ! {
 fn fault_service() -> ! {
     assert_eq!(sys::call(SYS_READ, 0, 0, 0, 0).0, ERR_DENIED);
     assert_eq!(sys::call(SYS_DISK_FLUSH, 0, 0, 0, 0).0, ERR_DENIED);
+    assert_eq!(sys::call(SYS_DISPLAY_INFO, 0, 0, 0, 0).0, ERR_DENIED);
+    assert_eq!(sys::call(SYS_DISPLAY_BLIT, 0, 0, 0, 0).0, ERR_DENIED);
+    assert_eq!(sys::call(SYS_INPUT, 0, 0, 0, 0).0, ERR_DENIED);
     loop {
         let message = sys::receive();
         unsafe {
