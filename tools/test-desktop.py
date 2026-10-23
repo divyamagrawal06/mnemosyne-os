@@ -59,6 +59,28 @@ class QMP:
             self.key(key)
         self.key('ret')
 
+    def fast_text(self, value, rate):
+        """Inject explicit make/break pairs at a measured 25 or 50 chars/sec.
+
+        Unlike the conservative HMP sendkey path, there is no held-key timer
+        and no 120-ms delay that could conceal guest input buffering loss.
+        """
+        special = {' ': 'spc', '.': 'dot', '-': 'minus'}
+        if rate not in (25, 50) or any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789 .-' for c in value):
+            raise ValueError('Fast input accepts lowercase ASCII commands at 25 or 50 chars/sec')
+        started = time.monotonic()
+        for index, character in enumerate(value):
+            time.sleep(max(0, started + index / rate - time.monotonic()))
+            code = {'type': 'qcode', 'data': special.get(character, character)}
+            self.execute('input-send-event', {'events': [
+                {'type': 'key', 'data': {'down': True, 'key': code}},
+                {'type': 'key', 'data': {'down': False, 'key': code}}]})
+        time.sleep(max(0, started + len(value) / rate - time.monotonic()))
+        elapsed = time.monotonic() - started
+        self.key('ret')
+        return {'target-chars-per-second': rate, 'characters': len(value),
+                'elapsed-seconds': elapsed, 'actual-chars-per-second': len(value) / elapsed}
+
     def screenshot(self, path):
         self.execute('screendump', {'filename': str(path.resolve())})
         data = path.read_bytes()
@@ -105,15 +127,19 @@ def wait_for(log, needle, timeout, after=0):
     raise AssertionError(f'Guest did not emit {needle!r}; inspect {log}')
 
 
-def terminal_command(qmp, log, command, timeout, expected):
+def terminal_command(qmp, log, command, timeout, expected, fast_rate=None):
     """Require this command's exact echo and completed result, never earlier output."""
     cursor = len(log.read_text(errors='replace'))
-    qmp.text(command)
+    timing = qmp.fast_text(command, fast_rate) if fast_rate else None
+    if not fast_rate:
+        qmp.text(command)
     output = wait_for(log, '"event":"native-command-complete"', timeout, after=cursor)[cursor:]
     echo = 'mnemosyne-os> ' + command
     if echo not in output or '"ok":false' in output or expected not in output:
         raise AssertionError(f'Fresh command did not complete correctly: {command!r}; output={output!r}')
-    return output
+    if timing and timing['actual-chars-per-second'] < fast_rate * .9:
+        raise AssertionError(f'Host did not deliver the required typing rate: {timing}')
+    return timing or output
 
 
 def main():
@@ -204,6 +230,14 @@ def main():
                     for operation, event in [('cap-demo', 'capability-demo'), ('fault-demo', 'fault-demo')]:
                         terminal_command(qmp, log, operation, args.timeout, '"event":"' + event + '","passed":true')
                         report['steps'].append({'guest-command': operation, 'passed': True})
+                    payload = ('abcdefghijklmnopqrstuvwxyz0123456789' * 12)[:430]
+                    for rate in (25, 50):
+                        name = f'fast-{rate}.txt'
+                        timing = terminal_command(qmp, log, f'write {name} {payload}', args.timeout,
+                                                  'committed generation=', fast_rate=rate)
+                        terminal_command(qmp, log, 'cat ' + name, args.timeout, '\n' + payload + '\n')
+                        report['steps'].append({'fast-typing-fidelity': True, 'payload-bytes': len(payload),
+                                                'payload-sha256': hashlib.sha256(payload.encode()).hexdigest(), **timing})
                     terminal_command(qmp, log, 'write desktop-proof.txt survived-reboot', args.timeout, 'committed generation=')
                 terminal_command(qmp, log, 'cat desktop-proof.txt', args.timeout, '\nsurvived-reboot\n')
                 time.sleep(1)
