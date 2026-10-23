@@ -1,0 +1,92 @@
+{
+  "started-at": "2026-10-23T06:45:54.736856+00:00",
+  "passed": true,
+  "image": {
+    "source-commit": "c609f43be488eb1c85f3432ce8dd6056f043721c",
+    "source-dirty": false,
+    "sha256": "388b361bc20b35329ad405b976405356827589efe1c57e4c0d54ef0c3dbe6ecd",
+    "profile": "release",
+    "guest-shell": true,
+    "guest-desktop": true
+  },
+  "steps": [
+    {
+      "loopback-vnc-handshake": "RFB 003.008"
+    },
+    {
+      "boot": 1,
+      "framebuffer-sha256": "be5f719b3aa83fe34699962c2093a2fbfcd48f367f3e5efa4245ffa399949951"
+    },
+    {
+      "mouse-movement-visible": true
+    },
+    {
+      "ps2-click-opened-tasks": true
+    },
+    {
+      "native-task-control": "stop",
+      "pid": 3,
+      "passed": true
+    },
+    {
+      "native-task-control": "start",
+      "pid": 3,
+      "passed": true
+    },
+    {
+      "native-file-editor-save": true
+    },
+    {
+      "guest-command": "cap-demo",
+      "passed": true
+    },
+    {
+      "guest-command": "fault-demo",
+      "passed": true
+    },
+    {
+      "fast-typing-fidelity": true,
+      "payload-bytes": 430,
+      "payload-sha256": "621923689851d6eba69b7000b73f087d09d39bed15a64d12ec87a90376a1d6ce",
+      "target-chars-per-second": 25,
+      "characters": 448,
+      "elapsed-seconds": 17.92013634700001,
+      "actual-chars-per-second": 24.999809785208424
+    },
+    {
+      "fast-typing-fidelity": true,
+      "payload-bytes": 430,
+      "payload-sha256": "621923689851d6eba69b7000b73f087d09d39bed15a64d12ec87a90376a1d6ce",
+      "target-chars-per-second": 50,
+      "characters": 448,
+      "elapsed-seconds": 8.960091265000003,
+      "actual-chars-per-second": 49.99949071389284
+    },
+    {
+      "read-only-preview-save-rejected": true,
+      "unchanged-payload-bytes": 430
+    },
+    {
+      "boot": 1,
+      "keyboard-file-read": true
+    },
+    {
+      "boot": 1,
+      "clean-shutdown": true
+    },
+    {
+      "boot": 2,
+      "framebuffer-sha256": "be5f719b3aa83fe34699962c2093a2fbfcd48f367f3e5efa4245ffa399949951"
+    },
+    {
+      "boot": 2,
+      "keyboard-file-read": true
+    },
+    {
+      "boot": 2,
+      "clean-shutdown": true
+    }
+  ],
+  "environment": "actual QEMU TCG / QMP / native framebuffer",
+  "finished-at": "2026-10-23T06:47:19.089983+00:00"
+}

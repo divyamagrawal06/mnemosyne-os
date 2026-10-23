@@ -1,0 +1,140 @@
+limine: Loading executable `boot():/boot/mnemosyne-kernel`...
+{"event":"boot","kernel":"mnemosyne","abi":1}
+{"event":"memory","regions":14,"usable_bytes":246603776}
+{"event":"frames_ok","count":2}
+{"event":"capabilities_ok"}
+{"event":"paging_ok","fault_probes":3}
+{"event":"exception_ok","vector":3}
+{"event":"timer_ok","ticks":5}
+{"event":"boot_ok"}
+{"event":"display-ready","width":1024,"height":768,"bpp":32}
+{"event":"input-ready","keyboard":true,"mouse":true,"mode":"ps2-polled"}
+{"event":"userspace-ready","tasks":4,"privilege":3,"scheduler":"round-robin-100hz"}
+
+mnemosyne-os 0.1 / x86-64 / ring-3 console
+4 protected tasks | preemptive scheduler | capability IPC | chronicle-fs
+chronicle-fs mounted: generation=4 retained=4
+Type help for commands, demo for the full demonstration, shutdown to exit.
+{"event":"native-desktop-ready"}
+mnemosyne-os> stop 2
+task-stop: pid=2
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> start 2
+task-start: pid=2
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> ipc-demo
+{"event":"ipc-demo","passed":true,"counter":6,"hog-preemptions":4060}
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> stop 1
+error: only service PIDs 2..4 may be controlled; init is protected
+{"event":"native-command-complete","ok":false}
+mnemosyne-os> rm aaa-long.txt
+committed generation=5
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-00.txt contents-00
+committed generation=6
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-01.txt contents-01
+committed generation=7
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-02.txt contents-02
+committed generation=8
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-03.txt contents-03
+committed generation=9
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-04.txt contents-04
+committed generation=10
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-05.txt contents-05
+committed generation=11
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-06.txt contents-06
+committed generation=12
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-07.txt contents-07
+committed generation=13
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-08.txt contents-08
+committed generation=14
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-09.txt contents-09
+committed generation=15
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-10.txt contents-10
+committed generation=16
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-11.txt contents-11
+committed generation=17
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-12.txt contents-12
+committed generation=18
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-13.txt contents-13
+committed generation=19
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write page-14.txt contents-14
+committed generation=20
+{"event":"native-command-complete","ok":true}
+{"event":"desktop-view","view":"files"}
+{"event":"desktop-file-open","name":"page-14.txt"}
+mnemosyne-os> cat page-14.txt
+contents-14
+{"event":"native-command-complete","ok":true}
+{"event":"desktop-file-open","name":"page-00.txt"}
+mnemosyne-os> cat page-00.txt
+contents-00
+{"event":"native-command-complete","ok":true}
+{"event":"desktop-view","view":"terminal"}
+mnemosyne-os> rm page-00.txt
+committed generation=21
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-01.txt
+committed generation=22
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-02.txt
+committed generation=23
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-03.txt
+committed generation=24
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-04.txt
+committed generation=25
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-05.txt
+committed generation=26
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-06.txt
+committed generation=27
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-07.txt
+committed generation=28
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-08.txt
+committed generation=29
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-09.txt
+committed generation=30
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-10.txt
+committed generation=31
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-11.txt
+committed generation=32
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-12.txt
+committed generation=33
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-13.txt
+committed generation=34
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> rm page-14.txt
+committed generation=35
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write hello.txt my own operating system
+committed generation=36
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> cat hello.txt
+my own operating system
+{"event":"native-command-complete","ok":true}
+{"event":"desktop-view","view":"tasks"}

@@ -1,0 +1,23 @@
+limine: Loading executable `boot():/boot/mnemosyne-kernel`...
+{"event":"boot","kernel":"mnemosyne","abi":1}
+{"event":"memory","regions":14,"usable_bytes":246669312}
+{"event":"frames_ok","count":2}
+{"event":"capabilities_ok"}
+{"event":"paging_ok","fault_probes":3}
+{"event":"exception_ok","vector":3}
+{"event":"timer_ok","ticks":5}
+{"event":"boot_ok"}
+{"event":"display-ready","width":1024,"height":768,"bpp":32}
+{"event":"input-ready","keyboard":true,"mouse":true,"mode":"ps2-polled"}
+{"event":"userspace-ready","tasks":4,"privilege":3,"scheduler":"round-robin-100hz"}
+
+mnemosyne-os 0.1 / x86-64 / ring-3 console
+4 protected tasks | preemptive scheduler | capability IPC | chronicle-fs
+chronicle-fs mounted: generation=6 retained=6
+Type help for commands, demo for the full demonstration, shutdown to exit.
+{"event":"native-desktop-ready"}
+mnemosyne-os> cat desktop-proof.txt
+survived-reboot
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> shutdown
+{"event":"guest-shutdown","status":0}

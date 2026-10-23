@@ -1,0 +1,71 @@
+limine: Loading executable `boot():/boot/mnemosyne-kernel`...
+{"event":"boot","kernel":"mnemosyne","abi":1}
+{"event":"memory","regions":14,"usable_bytes":246673408}
+{"event":"frames_ok","count":2}
+{"event":"capabilities_ok"}
+{"event":"paging_ok","fault_probes":3}
+{"event":"exception_ok","vector":3}
+{"event":"timer_ok","ticks":5}
+{"event":"boot_ok"}
+{"event":"display-ready","width":1024,"height":768,"bpp":32}
+{"event":"input-ready","keyboard":true,"mouse":true,"mode":"ps2-polled"}
+{"event":"userspace-ready","tasks":4,"privilege":3,"scheduler":"round-robin-100hz"}
+
+mnemosyne-os 0.1 / x86-64 / ring-3 console
+4 protected tasks | preemptive scheduler | capability IPC | chronicle-fs
+chronicle-fs mounted: generation=1 retained=1
+Type help for commands, demo for the full demonstration, shutdown to exit.
+{"event":"native-desktop-ready"}
+{"event":"desktop-view","view":"tasks"}
+{"event":"desktop-task-action","action":"stop","pid":3}
+mnemosyne-os> stop 3
+task-stop: pid=3
+{"event":"native-command-complete","ok":true}
+{"event":"desktop-task-action","action":"start","pid":3}
+mnemosyne-os> start 3
+task-start: pid=3
+{"event":"native-command-complete","ok":true}
+{"event":"desktop-view","view":"files"}
+{"event":"desktop-view","view":"tasks"}
+{"event":"desktop-view","view":"system"}
+{"event":"desktop-view","view":"terminal"}
+{"event":"desktop-view","view":"files"}
+{"event":"desktop-file-save","name":"note.txt"}
+mnemosyne-os> write note.txt desktop UI test
+committed generation=3
+{"event":"native-command-complete","ok":true}
+{"event":"desktop-view","view":"terminal"}
+mnemosyne-os> cap-demo
+{"event":"capability-demo","passed":true,"rejections":11}
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> fault-demo
+{"event":"task-fault","pid":4,"vector":14,"error":5,"rip":4426567,"address":18446744071562067968}
+{"event":"task-fault","pid":4,"vector":6,"error":0,"rip":4426464,"address":1073741824}
+{"event":"task-fault","pid":4,"vector":13,"error":0,"rip":4426547,"address":1073741824}
+{"event":"fault-demo","passed":true,"contained":3}
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write fast-25.txt abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01234567
+committed generation=4
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> cat fast-25.txt
+abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01234567
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write fast-50.txt abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01234567
+committed generation=5
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> cat fast-50.txt
+abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01234567
+{"event":"native-command-complete","ok":true}
+{"event":"desktop-view","view":"files"}
+{"event":"desktop-view","view":"terminal"}
+mnemosyne-os> cat fast-50.txt
+abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01234567
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> write desktop-proof.txt survived-reboot
+committed generation=6
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> cat desktop-proof.txt
+survived-reboot
+{"event":"native-command-complete","ok":true}
+mnemosyne-os> shutdown
+{"event":"guest-shutdown","status":0}

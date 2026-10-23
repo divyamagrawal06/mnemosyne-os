@@ -68,6 +68,12 @@ exactly-once external-effect protocol.
 
 ## Validation
 
+The native release at `c609f43` passed all 17 extracted-bundle acceptance steps.
+See [recorded native evidence](evidence/native-desktop/README.md), including exact
+430-byte typing at 25/50 characters per second and an additional live-window
+check of counter restart, protected init and file pagination. Later evidence-only
+commits do not change the tested ISO.
+
 - Native QEMU acceptance passed real framebuffer rendering, PS/2 keyboard and
   pointer navigation, worker stop/start, file-editor writes, display/input
   invalid-pointer rejection, service fault containment and two clean boots with
