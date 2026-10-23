@@ -48,7 +48,7 @@ class QMP:
 
     def key(self, name):
         self.execute('human-monitor-command', {'command-line': 'sendkey ' + name + ' 20'})
-        time.sleep(.04)
+        time.sleep(.12)
 
     def text(self, value):
         special = {' ': 'spc', '.': 'dot', '-': 'minus', '_': 'shift-minus', '/': 'slash'}
@@ -103,6 +103,17 @@ def wait_for(log, needle, timeout, after=0):
             return text
         time.sleep(.1)
     raise AssertionError(f'Guest did not emit {needle!r}; inspect {log}')
+
+
+def terminal_command(qmp, log, command, timeout, expected):
+    """Require this command's exact echo and completed result, never earlier output."""
+    cursor = len(log.read_text(errors='replace'))
+    qmp.text(command)
+    output = wait_for(log, '"event":"native-command-complete"', timeout, after=cursor)[cursor:]
+    echo = 'mnemosyne-os> ' + command
+    if echo not in output or '"ok":false' in output or expected not in output:
+        raise AssertionError(f'Fresh command did not complete correctly: {command!r}; output={output!r}')
+    return output
 
 
 def main():
@@ -191,16 +202,10 @@ def main():
                     report['steps'].append({'native-file-editor-save': True})
                     qmp.key('f1')
                     for operation, event in [('cap-demo', 'capability-demo'), ('fault-demo', 'fault-demo')]:
-                        cursor = len(log.read_text(errors='replace'))
-                        qmp.text(operation)
-                        wait_for(log, '"event":"' + event + '","passed":true', args.timeout, after=cursor)
+                        terminal_command(qmp, log, operation, args.timeout, '"event":"' + event + '","passed":true')
                         report['steps'].append({'guest-command': operation, 'passed': True})
-                    qmp.text('write desktop-proof.txt survived-reboot')
-                    wait_for(log, 'committed generation=', args.timeout)
-                before = len(log.read_text(errors='replace'))
-                qmp.text('cat desktop-proof.txt')
-                wait_for(log, 'survived-reboot', args.timeout, after=before)
-                wait_for(log, '"event":"native-command-complete","ok":true', args.timeout, after=before)
+                    terminal_command(qmp, log, 'write desktop-proof.txt survived-reboot', args.timeout, 'committed generation=')
+                terminal_command(qmp, log, 'cat desktop-proof.txt', args.timeout, '\nsurvived-reboot\n')
                 time.sleep(1)
                 report['steps'].append({'boot': boot, 'keyboard-file-read': True})
                 qmp.screenshot(folder / f'file-read-{boot}.ppm')
