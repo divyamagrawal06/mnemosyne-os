@@ -10,7 +10,9 @@ const EMPTY_EVENT: InputEvent = InputEvent {
     y: 0,
 };
 
-/// Fixed event ring. Adjacent motion with unchanged buttons coalesces. At full
+/// Fixed event ring. Adjacent motion with unchanged buttons and direction
+/// coalesces. Reversals stay separate: screen-edge clamping after each direction
+/// segment must have the same result as clamping after each original packet. At full
 /// capacity discard the oldest keyboard event first, retaining the latest mouse
 /// button state even during a long keyboard-only flood. If all entries are mouse
 /// transitions, discard the oldest transition; the newest state remains queued.
@@ -38,7 +40,12 @@ impl InputQueue {
         if self.len != 0 && event.kind == INPUT_MOUSE {
             let tail = (self.head + self.len - 1) % INPUT_QUEUE_CAPACITY;
             let previous = &mut self.events[tail];
-            if previous.kind == INPUT_MOUSE && previous.code == event.code {
+            let same_direction = |a: i32, b: i32| a == 0 || b == 0 || a.signum() == b.signum();
+            if previous.kind == INPUT_MOUSE
+                && previous.code == event.code
+                && same_direction(previous.x, event.x)
+                && same_direction(previous.y, event.y)
+            {
                 previous.x = previous.x.saturating_add(event.x).clamp(-32767, 32767);
                 previous.y = previous.y.saturating_add(event.y).clamp(-32767, 32767);
                 return;
@@ -337,6 +344,30 @@ mod tests {
         let movement = queue.pop().unwrap();
         assert_eq!((movement.x, movement.y), (32767, -32767));
         assert_eq!(queue.dropped(), 0);
+    }
+    #[test]
+    fn mouse_direction_changes_preserve_screen_edge_clamping() {
+        let mut queue = InputQueue::new();
+        let (mut original_x, mut original_y) = (40i32, 30i32);
+        for (x, y) in core::iter::repeat_n((-100, -100), 20).chain([(100, 100), (0, 100), (0, 50)])
+        {
+            original_x = (original_x + x).clamp(0, 1023);
+            original_y = (original_y + y).clamp(0, 767);
+            queue.push(mouse(0, x, y));
+        }
+        let (mut queued_x, mut queued_y) = (40i32, 30i32);
+        while let Some(event) = queue.pop() {
+            queued_x = (queued_x + event.x).clamp(0, 1023);
+            queued_y = (queued_y + event.y).clamp(0, 767);
+        }
+        assert_eq!((original_x, original_y), (100, 250));
+        assert_eq!((queued_x, queued_y), (original_x, original_y));
+
+        // Reversing only one axis still needs a distinct packet; otherwise an
+        // edge on that axis changes the result even if the other axis agrees.
+        queue.push(mouse(0, -100, 50));
+        queue.push(mouse(0, 20, 50));
+        assert_eq!(queue.len, 2);
     }
     #[test]
     fn keyboard_release_state_survives_event_queue_overflow() {
