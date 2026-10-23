@@ -65,7 +65,8 @@ checkpoints, a persistent snapshotting filesystem, guest Wasm replay, and a
 deterministic recovery-plan verifier.
 
 The prototype uses one CPU, four compiled-in native tasks and one admitted Wasm
-fixture. It is not a desktop OS or a formally verified kernel. See the
+fixture. It has a native desktop, but is not a general-purpose distribution or a
+formally verified kernel. See the
 [implementation status](docs/implementation-status.md),
 [professor brief](docs/professor-brief.md), and [full demo path](docs/cloud-demo.md).
 
