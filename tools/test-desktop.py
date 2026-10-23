@@ -95,6 +95,10 @@ def wait_for(log, needle, timeout, after=0):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         text = log.read_text(encoding='utf-8', errors='replace') if log.exists() else ''
+        if 'user-panic:' in text or 'PANIC' in text:
+            raise AssertionError(f'Guest panicked; inspect {log}')
+        if needle == 'native-desktop-ready' and 'mnemosyne-os> ' in text:
+            raise AssertionError(f'Guest fell back to serial console instead of desktop; inspect {log}')
         if needle in text[after:]:
             return text
         time.sleep(.1)
