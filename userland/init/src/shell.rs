@@ -201,6 +201,28 @@ impl Shell {
                     "only service PIDs 2..4 may be controlled; init is protected",
                 )?;
                 require(words.next().is_none(), "provide one service PID")?;
+                let state = sys::stats()[pid as usize - 1].state;
+                require(
+                    if operation == "stop" {
+                        state != 3
+                    } else {
+                        state == 3
+                    },
+                    if operation == "stop" {
+                        "task is already stopped"
+                    } else {
+                        "task is already running"
+                    },
+                )?;
+                if operation == "stop" && pid == 2 {
+                    // Counter service resumes from its quiescent checkpoint;
+                    // preserve one before stopping when none has been taken yet.
+                    let checkpoint = sys::call(SYS_CHECKPOINT, pid, 0, 0, 0).0;
+                    require(
+                        checkpoint == 0 || checkpoint == ERR_FULL,
+                        "counter service must be idle before stopping; retry shortly",
+                    )?;
+                }
                 let syscall = if operation == "stop" {
                     SYS_TASK_STOP
                 } else {

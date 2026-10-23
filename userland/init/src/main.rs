@@ -82,6 +82,7 @@ fn fault_service() -> ! {
     assert_eq!(sys::call(SYS_DISPLAY_INFO, 0, 0, 0, 0).0, ERR_DENIED);
     assert_eq!(sys::call(SYS_DISPLAY_BLIT, 0, 0, 0, 0).0, ERR_DENIED);
     assert_eq!(sys::call(SYS_INPUT, 0, 0, 0, 0).0, ERR_DENIED);
+    assert_eq!(sys::call(SYS_TASK_STOP, 3, 0, 0, 0).0, ERR_DENIED);
     loop {
         let message = sys::receive();
         unsafe {
