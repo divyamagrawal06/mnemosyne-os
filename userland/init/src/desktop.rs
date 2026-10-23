@@ -63,6 +63,8 @@ pub struct Desktop {
     ticks: u64,
     file_name: String,
     file_contents: String,
+    file_read_only: bool,
+    last_command: String,
     file_focus: usize,
     selected_file: Option<usize>,
     status: String,
@@ -108,6 +110,8 @@ impl Desktop {
             ticks: 0,
             file_name: "note.txt".to_string(),
             file_contents: String::new(),
+            file_read_only: false,
+            last_command: String::new(),
             file_focus: 1,
             selected_file: None,
             status: "Ready. F1 Terminal   F2 Files   F3 Tasks   F4 System".to_string(),
@@ -158,11 +162,51 @@ impl Desktop {
 
     pub fn set_file_contents(&mut self, name: &str, contents: &str) {
         self.file_name = name.to_string();
-        self.file_contents = contents.chars().take(420).collect();
-        self.status = format!(
-            "Read {} from the guest disk. Tab changes editor field.",
-            name
-        );
+        self.file_read_only =
+            contents.len() > 420 || !contents.bytes().all(|b| (32..=126).contains(&b));
+        self.file_contents = contents
+            .chars()
+            .take(420)
+            .map(|c| {
+                if c.is_ascii_graphic() || c == ' ' {
+                    c
+                } else {
+                    '.'
+                }
+            })
+            .collect();
+        self.status = if self.file_read_only {
+            "Read-only preview: file exceeds 420 bytes or contains non-printable text. Save disabled.".to_string()
+        } else {
+            format!(
+                "Read {} from the guest disk. Tab changes editor field.",
+                name
+            )
+        };
+        self.dirty = true;
+    }
+
+    pub fn command_complete(&mut self, ok: bool, output: &str) {
+        self.status = if !ok {
+            let detail = output
+                .lines()
+                .find(|line| line.starts_with("error:"))
+                .or_else(|| output.lines().find(|line| !line.is_empty()))
+                .unwrap_or("Command failed. Inspect Terminal.");
+            format!("Failed: {}", detail)
+        } else if self.file_read_only && self.view == View::Files {
+            "Read-only preview: oversized or non-printable file. Use New file to create an editable file.".to_string()
+        } else if self.last_command.starts_with("write ") {
+            format!(
+                "Saved {} to the guest disk.",
+                self.last_command
+                    .split_whitespace()
+                    .nth(1)
+                    .unwrap_or("file")
+            )
+        } else {
+            "Command completed. Ready.".to_string()
+        };
         self.dirty = true;
     }
 
@@ -205,6 +249,7 @@ impl Desktop {
             }
         }
         if let Some(command) = action.as_ref() {
+            self.last_command = command.clone();
             self.write_console(&format!("mnemosyne> {}\n", command));
         }
         if self.dirty {
@@ -316,7 +361,7 @@ impl Desktop {
                 8 => {
                     if self.file_focus == 0 {
                         self.file_name.pop();
-                    } else {
+                    } else if !self.file_read_only {
                         self.file_contents.pop();
                     }
                 }
@@ -327,7 +372,10 @@ impl Desktop {
                         && (c.is_ascii_alphanumeric() || "._-".contains(c))
                     {
                         self.file_name.push(c);
-                    } else if self.file_focus == 1 && self.file_contents.len() < 420 {
+                    } else if self.file_focus == 1
+                        && !self.file_read_only
+                        && self.file_contents.len() < 420
+                    {
                         self.file_contents.push(c);
                     }
                 }
@@ -338,6 +386,12 @@ impl Desktop {
     }
 
     fn save_file(&mut self) -> Option<String> {
+        if self.file_read_only {
+            self.status =
+                "Read-only preview cannot be saved. Choose New file for an editable document."
+                    .to_string();
+            return None;
+        }
         if self.file_name.is_empty() || !self.file_name.as_bytes()[0].is_ascii_alphanumeric() {
             self.status = "Filename must start with a letter or number.".to_string();
             return None;
@@ -431,6 +485,7 @@ impl Desktop {
                     self.selected_file = Some(i);
                     self.file_name = self.files[i].0.clone();
                     self.file_contents.clear();
+                    self.file_read_only = true;
                     self.file_focus = 1;
                     self.status = format!("Reading {}...", self.file_name);
                     crate::println!(
@@ -481,6 +536,7 @@ impl Desktop {
             {
                 self.file_name = "new.txt".to_string();
                 self.file_contents.clear();
+                self.file_read_only = false;
                 self.file_focus = 0;
                 self.selected_file = None;
                 self.status = "Type a filename, Tab to contents, then Save file.".to_string();
@@ -507,16 +563,37 @@ impl Desktop {
         {
             return Some("ps".to_string());
         }
+        if self.view == View::Tasks {
+            for (i, task) in self.tasks.iter().enumerate() {
+                if task.pid > 1
+                    && (Rect {
+                        x: c.x + c.w - 95,
+                        y: c.y + 104 + i * 48,
+                        w: 95,
+                        h: 28,
+                    })
+                    .contains(x, y)
+                {
+                    let operation = if task.state == 3 { "start" } else { "stop" };
+                    crate::println!(
+                        "{{\"event\":\"desktop-task-action\",\"action\":\"{}\",\"pid\":{}}}",
+                        operation,
+                        task.pid
+                    );
+                    return Some(format!("{} {}", operation, task.pid));
+                }
+            }
+        }
         if self.view == View::System {
             for (i, command) in [
-                "demo",
+                "about",
+                "uptime",
+                "fs-info",
                 "ipc-demo",
                 "cap-demo",
                 "fault-demo",
-                "cow-demo",
-                "wasm-demo",
-                "self-test",
-                "recover",
+                "ps",
+                "shutdown",
             ]
             .iter()
             .enumerate()
@@ -890,7 +967,18 @@ impl Desktop {
         );
         let name = self.file_name.clone();
         self.text(ex + 10, c.y + 75, &name, INK, 1, (ew - 20) / 9);
-        self.text(ex, c.y + 108, "File contents", MUTED, 1, 20);
+        self.text(
+            ex,
+            c.y + 108,
+            if self.file_read_only {
+                "Read-only preview"
+            } else {
+                "File contents"
+            },
+            MUTED,
+            1,
+            24,
+        );
         self.rect(
             Rect {
                 x: ex,
@@ -944,8 +1032,12 @@ impl Desktop {
                 w: 130,
                 h: 34,
             },
-            "Save file",
-            true,
+            if self.file_read_only {
+                "Read only"
+            } else {
+                "Save file"
+            },
+            !self.file_read_only,
         );
         self.button(
             Rect {
@@ -960,7 +1052,11 @@ impl Desktop {
         self.text(
             ex,
             c.y + c.h - 14,
-            "Tab: field   Enter: save",
+            if self.file_read_only {
+                "Preview only. Use New file to edit."
+            } else {
+                "Tab: field   Enter: save"
+            },
             MUTED,
             1,
             ew / 9,
@@ -1029,6 +1125,18 @@ impl Desktop {
             for (offset, value) in columns.iter().zip(values.iter()) {
                 self.text(c.x + offset, y, value, INK, 1, 18);
             }
+            if task.pid > 1 {
+                self.button(
+                    Rect {
+                        x: c.x + c.w - 95,
+                        y: y - 6,
+                        w: 95,
+                        h: 28,
+                    },
+                    if task.state == 3 { "Start" } else { "Stop" },
+                    false,
+                );
+            }
         }
         self.text(
             c.x,
@@ -1069,14 +1177,14 @@ impl Desktop {
         );
         self.text(c.x, c.y + 88, "x86-64 guest running in QEMU", MUTED, 1, 60);
         for (i, label) in [
-            "Full demo",
+            "About this OS",
+            "Uptime",
+            "Disk information",
             "IPC demo",
             "Capabilities",
             "Fault isolation",
-            "Copy on write",
-            "Wasm demo",
-            "Self-test",
-            "Recovery",
+            "Task listing",
+            "Shut down",
         ]
         .iter()
         .enumerate()
